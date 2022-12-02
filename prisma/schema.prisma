@@ -1,0 +1,116 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgres"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+  id                String              @id @default(uuid())
+  email             String              @unique
+  password          String
+  accountNumber     String              @unique @map("account_number")
+  balance           BigInt
+  CustomerRecipient CustomerRecipient[]
+  Transaction       Transaction[]
+
+  createdDebts  Debt[]         @relation("createdDebts")
+  receivedDebts Debt[]         @relation("receivedDebts")
+  Notification  Notification[]
+
+  @@map("customers")
+}
+
+model Recipient {
+  id                String              @id @default(uuid())
+  accountNumber     String              @unique @map("account_number")
+  mnemonicName      String?             @unique @map("mnemonic_name")
+  CustomerRecipient CustomerRecipient[]
+  Transactions      Transaction[]
+
+  @@map("recipients")
+}
+
+model CustomerRecipient {
+  id          Int       @id @default(autoincrement())
+  customerId  String    @map("customer_id")
+  recipientId String    @map("recipient_id")
+  Customer    Customer  @relation(fields: [customerId], references: [id])
+  Recipient   Recipient @relation(fields: [recipientId], references: [id])
+
+  @@unique([customerId, recipientId])
+  @@index([customerId])
+  @@map("customer_recipient")
+}
+
+enum TransactionType {
+  INTERNAL
+  EXTERNAL
+}
+
+model Transaction {
+  id          Int             @id @default(autoincrement())
+  customerId  String          @map("customer_id")
+  recipientId String?         @map("recipient_id")
+  amount      BigInt
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+  deletedAt   DateTime?       @map("deleted_at")
+  type        TransactionType
+  Customer    Customer        @relation(fields: [customerId], references: [id])
+  Recipient   Recipient?      @relation(fields: [recipientId], references: [id])
+  // TODO: save external transaction data
+
+  @@index([customerId])
+  @@map("transactions")
+}
+
+model Debt {
+  id     Int    @id @default(autoincrement())
+  amount BigInt
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime @map("deleted_at")
+
+  receiverId String   @map("receiver_id")
+  Customer   Customer @relation("createdDebts", fields: [receiverId], references: [id])
+  creatorId  String   @map("created_by")
+  Creator    Customer @relation("receivedDebts", fields: [creatorId], references: [id])
+
+  isPaid Boolean   @default(false) @map("is_paid")
+  paidAt DateTime? @map("paid_at")
+
+  @@index([creatorId, receiverId])
+  @@map("debts")
+}
+
+enum NotificationType {
+  DEBT_CREATED
+  DEBT_PAID
+  DEBT_DELETED
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime @map("deleted_at")
+
+  customerId String   @map("customer_id")
+  Customer   Customer @relation(fields: [customerId], references: [id])
+
+  type NotificationType
+
+  title String
+  text  String
+  url   String?
+
+  isRead Boolean   @default(false) @map("is_read")
+  readAt DateTime? @map("read_at")
+
+  @@index([customerId])
+  @@map("notifications")
+}
