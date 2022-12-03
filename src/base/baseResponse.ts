@@ -1,4 +1,4 @@
-export interface BaseResponse<T> {
+export interface BaseResponse {
   data?: any;
 
   error?: {
@@ -7,7 +7,7 @@ export interface BaseResponse<T> {
   };
 }
 
-export interface PagingResponse<T> extends BaseResponse<T> {
+export interface PagingResponse extends BaseResponse {
   metadata: {
     total: number;
     page: number;

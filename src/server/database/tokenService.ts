@@ -3,7 +3,7 @@ import { ApiError } from "./../../base/baseResponse";
 import { Prisma, TokenType } from "@prisma/client";
 import { randomUUID } from "crypto";
 import prisma from "../../lib/prisma";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { NextApiRequest } from "next";
 
 const defaultTokenSelector: Prisma.TokenSelect = {
@@ -15,6 +15,10 @@ const defaultTokenSelector: Prisma.TokenSelect = {
 export type DefaultTokenSelector = Prisma.TokenGetPayload<{
   select: typeof defaultTokenSelector;
 }>;
+
+export interface AccessTokenPayload extends JwtPayload {
+  id: string;
+}
 
 export const COOKIES_TOKEN_NAME = "accessToken";
 
@@ -40,7 +44,7 @@ export class TokenService {
   };
 
   static generateAccessToken = async (
-    payload: any,
+    payload: AccessTokenPayload,
     expiresIn: string
   ): Promise<string | null> => {
     const secret = process.env.JWT_SECRET || "xinchaocacbanlailachaod4y";
@@ -67,24 +71,31 @@ export class TokenService {
     return tokenData;
   };
 
-  static validateAccessToken = async (token: string): Promise<any> => {
+  static validateAccessToken = async (
+    token: string
+  ): Promise<AccessTokenPayload> => {
+    // skip bearer if there is any
+    const accessToken = token.replace("Bearer ", "");
+
     const secret = process.env.JWT_SECRET
       ? process.env.JWT_SECRET
       : "xinchaocacbanlailachaod4y";
 
     return new Promise((resolve, reject) => {
-      jwt.verify(token, secret, (err, decoded) => {
+      jwt.verify(accessToken, secret, (err, decoded) => {
         if (err) {
           reject(err);
         }
 
-        resolve(decoded);
+        resolve(decoded as AccessTokenPayload);
       });
     });
   };
 
-  static requireAuth = async <T>(req: NextApiRequest): Promise<string> => {
-    const token = req.cookies["token"];
+  static requireAuth = async <T>(
+    req: NextApiRequest
+  ): Promise<AccessTokenPayload> => {
+    const token = req.headers.authorization?.split(" ")[1];
 
     if (!token) {
       throw new ApiError("Unauthorized", 401);
@@ -100,7 +111,7 @@ export class TokenService {
   };
 
   static requireNotAuth = async <T>(req: NextApiRequest): Promise<void> => {
-    const token = parseCookies({ req })[COOKIES_TOKEN_NAME];
+    const token = req.headers.authorization?.split(" ")[1];
 
     if (token) {
       throw new ApiError("Already logged in", 401);

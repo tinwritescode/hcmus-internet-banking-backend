@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import prisma from "../../lib/prisma";
 
 export class EmployeeService {
-  static defaultEmployeeSelector: Prisma.EmployeeSelect = {
+  static defaultSelector: Prisma.EmployeeSelect = {
     id: true,
     firstName: true,
     lastName: true,
@@ -19,7 +19,7 @@ export class EmployeeService {
     email: string,
     password: string
   ): Promise<Prisma.EmployeeGetPayload<{
-    select: typeof EmployeeService.defaultEmployeeSelector;
+    select: typeof EmployeeService.defaultSelector;
   }> | null> => {
     const hashedPassword = await hashPassword(password);
 
@@ -29,7 +29,7 @@ export class EmployeeService {
           email: email,
           password: hashedPassword,
         },
-        select: EmployeeService.defaultEmployeeSelector,
+        select: EmployeeService.defaultSelector,
       });
 
       return employee;
@@ -44,14 +44,14 @@ export class EmployeeService {
   static getEmployeeById = async (
     id: string
   ): Promise<Prisma.EmployeeGetPayload<{
-    select: typeof EmployeeService.defaultEmployeeSelector;
+    select: typeof EmployeeService.defaultSelector;
   }> | null> => {
     try {
       const employee = await prisma.employee.findUnique({
         where: {
           id: id,
         },
-        select: EmployeeService.defaultEmployeeSelector,
+        select: EmployeeService.defaultSelector,
       });
 
       return employee;
@@ -63,14 +63,14 @@ export class EmployeeService {
   static getEmployeeByEmail = async (
     email: string
   ): Promise<Prisma.EmployeeGetPayload<{
-    select: typeof EmployeeService.defaultEmployeeSelector;
+    select: typeof EmployeeService.defaultSelector;
   }> | null> => {
     try {
       const employee = await prisma.employee.findUnique({
         where: {
           email: email,
         },
-        select: EmployeeService.defaultEmployeeSelector,
+        select: EmployeeService.defaultSelector,
       });
 
       return employee;
