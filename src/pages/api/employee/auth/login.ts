@@ -1,11 +1,7 @@
-import { setCookie } from "nookies";
 import { z } from "zod";
 import { catchAsync, validateSchema } from "../../../../base/catchAsync";
 import { CustomerService } from "../../../../server/database/customerService";
-import {
-  TokenService,
-  COOKIES_TOKEN_NAME,
-} from "../../../../server/database/tokenService";
+import { TokenService } from "../../../../server/database/tokenService";
 
 const loginValidate = z.object({
   email: z.string().email(),
@@ -24,11 +20,6 @@ export default catchAsync(async function handle(req, res) {
         password
       );
 
-      setCookie({ res }, COOKIES_TOKEN_NAME, result.tokens.accessToken, {
-        httpOnly: true,
-        maxAge: 60 * 60 * 24 * 7,
-        secure: process.env.NODE_ENV === "production",
-      });
       res.status(200).json({ data: result });
       break;
     default:
