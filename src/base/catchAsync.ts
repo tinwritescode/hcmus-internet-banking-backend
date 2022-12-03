@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import { z, ZodError } from "zod";
 import { ApiError, BaseResponse } from "./baseResponse";
@@ -13,13 +14,10 @@ export const validateSchema = <T>(schema: z.ZodSchema<T>, data: any) => {
   }
 };
 
-export const catchAsync = <T>(
-  fn: <T>(
-    req: NextApiRequest,
-    res: NextApiResponse<BaseResponse<T>>
-  ) => Promise<void>
+export const catchAsync = (
+  fn: (req: NextApiRequest, res: NextApiResponse<BaseResponse>) => Promise<void>
 ) => {
-  return async (req: NextApiRequest, res: NextApiResponse<BaseResponse<T>>) => {
+  return async (req: NextApiRequest, res: NextApiResponse<BaseResponse>) => {
     const stackTrace = new Error().stack;
     const isDev = process.env.NODE_ENV === "development";
 
@@ -30,6 +28,16 @@ export const catchAsync = <T>(
             message: err.message,
             stackTrace: isDev ? stackTrace : undefined,
             ...err.error,
+          },
+        } as any);
+      }
+
+      if (err instanceof Prisma.PrismaClientKnownRequestError) {
+        return res.status(400).json({
+          error: {
+            message: err.message,
+            stackTrace: isDev ? stackTrace : undefined,
+            ...err,
           },
         } as any);
       }

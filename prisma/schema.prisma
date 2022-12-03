@@ -29,7 +29,7 @@ model Customer {
 model Recipient {
   id                String              @id @default(uuid())
   accountNumber     String              @unique @map("account_number")
-  mnemonicName      String?             @unique @map("mnemonic_name")
+  mnemonicName      String?             @map("mnemonic_name")
   CustomerRecipient CustomerRecipient[]
   Transactions      Transaction[]
 
@@ -40,8 +40,8 @@ model CustomerRecipient {
   id          BigInt    @id @default(autoincrement())
   customerId  String    @map("customer_id")
   recipientId String    @map("recipient_id")
-  Customer    Customer  @relation(fields: [customerId], references: [id])
-  Recipient   Recipient @relation(fields: [recipientId], references: [id])
+  Customer    Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  Recipient   Recipient @relation(fields: [recipientId], references: [id], onDelete: Cascade)
 
   @@unique([customerId, recipientId])
   @@index([customerId])
