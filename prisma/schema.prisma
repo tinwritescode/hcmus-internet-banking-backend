@@ -3,22 +3,25 @@ generator client {
 }
 
 datasource db {
-  provider = "postgres"
+  provider = "cockroachdb"
   url      = env("DATABASE_URL")
 }
+
+// Phan he 1: Customer
 
 model Customer {
   id                String              @id @default(uuid())
   email             String              @unique
   password          String
   accountNumber     String              @unique @map("account_number")
-  balance           BigInt
+  balance           BigInt              @default(0)
   CustomerRecipient CustomerRecipient[]
   Transaction       Transaction[]
 
   createdDebts  Debt[]         @relation("createdDebts")
   receivedDebts Debt[]         @relation("receivedDebts")
   Notification  Notification[]
+  Token         Token[]
 
   @@map("customers")
 }
@@ -34,7 +37,7 @@ model Recipient {
 }
 
 model CustomerRecipient {
-  id          Int       @id @default(autoincrement())
+  id          BigInt    @id @default(autoincrement())
   customerId  String    @map("customer_id")
   recipientId String    @map("recipient_id")
   Customer    Customer  @relation(fields: [customerId], references: [id])
@@ -51,7 +54,7 @@ enum TransactionType {
 }
 
 model Transaction {
-  id          Int             @id @default(autoincrement())
+  id          BigInt          @id @default(autoincrement())
   customerId  String          @map("customer_id")
   recipientId String?         @map("recipient_id")
   amount      BigInt
@@ -68,7 +71,7 @@ model Transaction {
 }
 
 model Debt {
-  id     Int    @id @default(autoincrement())
+  id     BigInt @id @default(autoincrement())
   amount BigInt
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -94,7 +97,7 @@ enum NotificationType {
 }
 
 model Notification {
-  id        Int      @id @default(autoincrement())
+  id        BigInt   @id @default(autoincrement())
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   deletedAt DateTime @map("deleted_at")
@@ -113,4 +116,80 @@ model Notification {
 
   @@index([customerId])
   @@map("notifications")
+}
+
+enum EmployeeType {
+  ADMIN
+  EMPLOYEE
+}
+
+// Phan he 2: Employee
+model Employee {
+  id        String @id @default(uuid())
+  email     String @unique
+  password  String
+  firstName String @map("first_name")
+  lastName  String @map("last_name")
+
+  EmployeeType EmployeeType
+
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  EmployeeLog EmployeeLog[]
+
+  @@map("employees")
+}
+
+enum EmployeeLogType {
+  CUSTOMER_CREATED
+  CUSTOMER_DEPOSIT
+  CUSTOMER_VIEW_TRANSACTION
+}
+
+model EmployeeLog {
+  id        BigInt   @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime @map("deleted_at")
+
+  employeeId String   @map("employee_id")
+  Employee   Employee @relation(fields: [employeeId], references: [id])
+
+  type EmployeeLogType
+  data String
+
+  @@index([employeeId])
+  @@map("employee_logs")
+}
+
+model Statistic {
+  id        BigInt   @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime @map("deleted_at")
+
+  totalMoneyDelivered BigInt @map("total_money_delivered")
+
+  @@map("statistics")
+}
+
+enum TokenType {
+  RESET_PASSWORD
+  VERIFY_EMAIL
+  REFRESH
+}
+
+model Token {
+  id        BigInt   @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  token     String
+  type      TokenType
+  expiredAt DateTime  @map("expired_at")
+
+  customerId String?   @map("customer_id")
+  Customer   Customer? @relation(fields: [customerId], references: [id])
+
+  @@map("tokens")
 }
