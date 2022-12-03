@@ -14,21 +14,15 @@ export type DefaultCustomerSelector = Prisma.CustomerGetPayload<{
   select: typeof defaultCustomerSelector;
 }>;
 
-export interface CustomerWithToken extends DefaultCustomerSelector {
-  tokens: {
-    accessToken: string;
-    refreshToken: string;
-  };
-}
-
 export class CustomerService {
-  static createCustomer = async (
-    customer: Prisma.CustomerCreateInput
-  ): Promise<DefaultCustomerSelector | null> => {
+  static createCustomer = async (customer: Prisma.CustomerCreateInput) => {
     try {
       const newCustomer = await prisma.customer.create({
         data: customer,
-        select: defaultCustomerSelector,
+        select: {
+          ...defaultCustomerSelector,
+          email: true,
+        },
       });
 
       return newCustomer;
@@ -39,10 +33,7 @@ export class CustomerService {
     }
   };
 
-  static authenticateCustomer = async (
-    email: string,
-    password: string
-  ): Promise<CustomerWithToken | null> => {
+  static authenticateCustomer = async (email: string, password: string) => {
     try {
       const hashedPassword = (
         await prisma.customer.findFirstOrThrow({
