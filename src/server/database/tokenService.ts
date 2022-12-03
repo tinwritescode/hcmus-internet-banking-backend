@@ -1,7 +1,10 @@
+import { parseCookies } from "nookies";
+import { ApiError } from "./../../base/baseResponse";
 import { Prisma, TokenType } from "@prisma/client";
 import { randomUUID } from "crypto";
 import prisma from "../../lib/prisma";
 import jwt from "jsonwebtoken";
+import { NextApiRequest } from "next";
 
 const defaultTokenSelector: Prisma.TokenSelect = {
   id: true,
@@ -12,6 +15,8 @@ const defaultTokenSelector: Prisma.TokenSelect = {
 export type DefaultTokenSelector = Prisma.TokenGetPayload<{
   select: typeof defaultTokenSelector;
 }>;
+
+export const COOKIES_TOKEN_NAME = "accessToken";
 
 export class TokenService {
   static generateToken = async (
@@ -60,5 +65,45 @@ export class TokenService {
     });
 
     return tokenData;
+  };
+
+  static validateAccessToken = async (token: string): Promise<any> => {
+    const secret = process.env.JWT_SECRET
+      ? process.env.JWT_SECRET
+      : "xinchaocacbanlailachaod4y";
+
+    return new Promise((resolve, reject) => {
+      jwt.verify(token, secret, (err, decoded) => {
+        if (err) {
+          reject(err);
+        }
+
+        resolve(decoded);
+      });
+    });
+  };
+
+  static requireAuth = async <T>(req: NextApiRequest): Promise<string> => {
+    const token = req.cookies["token"];
+
+    if (!token) {
+      throw new ApiError("Unauthorized", 401);
+    }
+
+    try {
+      const decoded = await TokenService.validateAccessToken(token);
+
+      return decoded;
+    } catch (error) {
+      throw new ApiError("Unauthorized", 401);
+    }
+  };
+
+  static requireNotAuth = async <T>(req: NextApiRequest): Promise<void> => {
+    const token = parseCookies({ req })[COOKIES_TOKEN_NAME];
+
+    if (token) {
+      throw new ApiError("Already logged in", 401);
+    }
   };
 }
