@@ -64,6 +64,10 @@ export class CustomerService {
         select: defaultCustomerSelector,
       });
 
+      if (!customer) {
+        throw new ApiError("Invalid credentials", 401);
+      }
+
       const tokens = await Promise.all([
         TokenService.generateToken(
           "REFRESH",
@@ -85,11 +89,9 @@ export class CustomerService {
         },
       };
     } catch (error) {
-      if (error instanceof ApiError) {
+      if (error instanceof ApiError || error.code === "P2025") {
         throw new ApiError("Invalid credentials", 401);
       }
-
-      throw new Error(error);
     }
   };
 
