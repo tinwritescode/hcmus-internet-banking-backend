@@ -3,6 +3,14 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { z, ZodError } from "zod";
 import { ApiError, BaseResponse } from "./baseResponse";
 
+import Cors from "cors";
+import { runMiddleware } from "./runMiddleware";
+
+const cors = Cors({
+  methods: ["GET", "HEAD", "POST", "PUT", "DELETE"],
+  origin: "*",
+});
+
 /// A function that validate the request body or query string
 export const validateSchema = <T>(schema: z.ZodSchema<T>, data: any) => {
   try {
@@ -21,32 +29,38 @@ export const catchAsync = (
     const stackTrace = new Error().stack;
     const isDev = process.env.NODE_ENV === "development";
 
-    fn(req, res).catch((err) => {
-      if (err instanceof ApiError) {
-        return res.status(err.status).json({
-          error: {
-            message: err.message,
-            stackTrace: isDev ? stackTrace : undefined,
-            ...err.error,
-          },
-        } as any);
-      }
+    try {
+      await runMiddleware(req, res, cors);
 
-      if (err instanceof Prisma.PrismaClientKnownRequestError) {
-        return res.status(400).json({
-          error: {
-            message: err.message,
-            stackTrace: isDev ? stackTrace : undefined,
-            ...err,
-          },
-        } as any);
-      }
+      fn(req, res).catch((err) => {
+        if (err instanceof ApiError) {
+          return res.status(err.status).json({
+            error: {
+              message: err.message,
+              stackTrace: isDev ? stackTrace : undefined,
+              ...err.error,
+            },
+          } as any);
+        }
 
+        if (err instanceof Prisma.PrismaClientKnownRequestError) {
+          return res.status(400).json({
+            error: {
+              message: err.message,
+              stackTrace: isDev ? stackTrace : undefined,
+              ...err,
+            },
+          } as any);
+        }
+
+        throw err;
+      });
+    } catch (err) {
       return res.status(500).json({
         data: null,
         error: { message: err.message, data: err },
         stackTrace: isDev ? stackTrace : undefined,
       } as any);
-    });
+    }
   };
 };

@@ -8,6 +8,8 @@ import moment from "moment";
 const defaultCustomerSelector: Prisma.CustomerSelect = {
   id: true,
   accountNumber: true,
+  lastName: true,
+  firstName: true,
 };
 
 export type DefaultCustomerSelector = Prisma.CustomerGetPayload<{
@@ -35,6 +37,8 @@ export class CustomerService {
       if (error.code === "P2002") {
         throw new ApiError("Email already exists", 400);
       }
+
+      throw error;
     }
   };
 
@@ -137,6 +141,26 @@ export class CustomerService {
         select: { id: true },
       })
     )?.id;
+  };
+
+  static getCustomerByBankNumber = async (to: string) => {
+    return await prisma.customer.findUnique({
+      where: { accountNumber: to },
+      select: { ...defaultCustomerSelector },
+    });
+  };
+
+  static getCustomerById = async (
+    id: string,
+    { withBalance = false }: { withBalance: boolean }
+  ) => {
+    return await prisma.customer.findUnique({
+      where: { id },
+      select: {
+        ...defaultCustomerSelector,
+        ...(withBalance && { balance: true }),
+      },
+    });
   };
 }
 

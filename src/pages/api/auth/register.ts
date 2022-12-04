@@ -8,6 +8,8 @@ import { CustomerService } from "../../../server/database/customerService";
 const registerValidate = z.object({
   email: z.string().email(),
   password: z.string().min(8),
+  firstName: z.string().min(2),
+  lastName: z.string().min(2),
 });
 
 export default catchAsync(async function handle(req, res) {
@@ -17,6 +19,8 @@ export default catchAsync(async function handle(req, res) {
 
       const newCustomer: Prisma.CustomerCreateInput = {
         accountNumber: getRandomBankNumber().toString(),
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
         email: req.body.email,
         password: await hashPassword(req.body.password),
       };

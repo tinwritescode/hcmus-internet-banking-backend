@@ -14,6 +14,8 @@ model Customer {
   email             String              @unique
   password          String
   accountNumber     String              @unique @map("account_number")
+  firstName         String              @map("first_name")
+  lastName          String              @map("last_name")
   balance           BigInt              @default(0)
   CustomerRecipient CustomerRecipient[]
   Transaction       Transaction[]
