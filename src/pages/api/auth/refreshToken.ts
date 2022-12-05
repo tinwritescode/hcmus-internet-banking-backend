@@ -1,10 +1,8 @@
-import { TokenType } from "@prisma/client";
 import { TokenService } from "../../../server/database/tokenService";
 import { z } from "zod";
 import { catchAsync, validateSchema } from "../../../base/catchAsync";
 import { CustomerService } from "../../../server/database/customerService";
 import { ApiError } from "../../../base/baseResponse";
-import moment from "moment";
 
 const refreshTokenValidate = z.object({
   refreshToken: z.string().min(1),
