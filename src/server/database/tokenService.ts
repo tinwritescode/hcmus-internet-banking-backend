@@ -129,18 +129,15 @@ export class TokenService {
 
   static validateRefreshToken = async (token: string): Promise<boolean> => {
     const tokenData = await prisma.token.findFirst({
-      where: { token, type: TokenType.REFRESH },
+      where: { token, type: TokenType.REFRESH, isBlacklisted: false },
       select: {
-        isBlacklisted: true,
         expiredAt: true,
       },
     });
 
-    if (!tokenData) {
-      return false;
-    }
+    console.log("tokenData", tokenData);
 
-    if (tokenData.isBlacklisted) {
+    if (!tokenData) {
       return false;
     }
 
