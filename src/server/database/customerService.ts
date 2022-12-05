@@ -1,6 +1,6 @@
 import { comparePassword } from "./../../lib/bcrypt";
 import { TokenService } from "./tokenService";
-import { Prisma } from "@prisma/client";
+import { Prisma, TokenType } from "@prisma/client";
 import { ApiError } from "../../base/baseResponse";
 import prisma from "../../lib/prisma";
 import moment from "moment";
@@ -70,7 +70,7 @@ export class CustomerService {
 
       const tokens = await Promise.all([
         TokenService.generateToken(
-          "REFRESH",
+          TokenType.REFRESH,
           moment()
             .add(process.env.REFRESH_TOKEN_EXPIRES_IN || "7d")
             .toDate()
@@ -162,6 +162,18 @@ export class CustomerService {
         ...defaultCustomerSelector,
         ...(withBalance && { balance: true }),
       },
+    });
+  };
+
+  static getCustomerByRefreshToken = async (refreshToken: any) => {
+    const token = await TokenService.getToken(refreshToken);
+
+    if (!token) {
+      throw new ApiError("Invalid token", 401);
+    }
+
+    return CustomerService.getCustomerById(token.customerId, {
+      withBalance: true,
     });
   };
 }

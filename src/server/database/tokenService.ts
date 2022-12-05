@@ -126,4 +126,28 @@ export class TokenService {
       },
     });
   };
+
+  static validateRefreshToken = async (token: string): Promise<boolean> => {
+    const tokenData = await prisma.token.findFirst({
+      where: { token, type: TokenType.REFRESH },
+      select: {
+        isBlacklisted: true,
+        expiredAt: true,
+      },
+    });
+
+    if (!tokenData) {
+      return false;
+    }
+
+    if (tokenData.isBlacklisted) {
+      return false;
+    }
+
+    if (tokenData.expiredAt < new Date()) {
+      return false;
+    }
+
+    return true;
+  };
 }

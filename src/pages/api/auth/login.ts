@@ -1,8 +1,4 @@
-import { setCookie } from "nookies";
-import {
-  COOKIES_TOKEN_NAME,
-  TokenService,
-} from "./../../../server/database/tokenService";
+import { TokenService } from "./../../../server/database/tokenService";
 import { z } from "zod";
 import { catchAsync, validateSchema } from "../../../base/catchAsync";
 import { CustomerService } from "../../../server/database/customerService";
