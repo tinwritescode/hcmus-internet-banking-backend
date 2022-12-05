@@ -101,7 +101,7 @@ export class TokenService {
     });
   };
 
-  static requireAuth = async <T>(
+  static requireAuth = async (
     req: NextApiRequest
   ): Promise<{ payload: AccessTokenPayload; token: string }> => {
     const token = req.headers.authorization?.split(" ")[1];
