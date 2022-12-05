@@ -94,7 +94,7 @@ export class TokenService {
 
   static requireAuth = async <T>(
     req: NextApiRequest
-  ): Promise<AccessTokenPayload> => {
+  ): Promise<{ payload: AccessTokenPayload; token: string }> => {
     const token = req.headers.authorization?.split(" ")[1];
 
     if (!token) {
@@ -104,7 +104,7 @@ export class TokenService {
     try {
       const decoded = await TokenService.validateAccessToken(token);
 
-      return decoded;
+      return { payload: decoded, token };
     } catch (error) {
       throw new ApiError("Unauthorized", 401);
     }
@@ -116,5 +116,14 @@ export class TokenService {
     if (token) {
       throw new ApiError("Already logged in", 401);
     }
+  };
+
+  static blackListToken = async (token: string): Promise<void> => {
+    await prisma.token.updateMany({
+      where: { token },
+      data: {
+        isBlacklisted: true,
+      },
+    });
   };
 }

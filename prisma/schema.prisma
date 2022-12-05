@@ -190,6 +190,8 @@ model Token {
   type      TokenType
   expiredAt DateTime  @map("expired_at")
 
+  isBlacklisted Boolean @default(false) @map("is_blacklisted")
+
   customerId String?   @map("customer_id")
   Customer   Customer? @relation(fields: [customerId], references: [id])
 

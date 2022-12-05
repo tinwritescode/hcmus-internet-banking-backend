@@ -24,11 +24,6 @@ export default catchAsync(async function handle(req, res) {
         password
       );
 
-      setCookie({ res }, COOKIES_TOKEN_NAME, result.tokens.accessToken, {
-        httpOnly: true,
-        maxAge: 60 * 60 * 24 * 7,
-        secure: process.env.NODE_ENV === "production",
-      });
       res.status(200).json({ data: result });
       break;
     default:
