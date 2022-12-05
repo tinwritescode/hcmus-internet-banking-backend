@@ -24,7 +24,7 @@ export class CustomerService {
       const newCustomer = await prisma.customer.create({
         data: {
           ...customer,
-          balance: isDev && 11e9,
+          balance: (isDev && 11e9) || 0,
         },
         select: {
           ...defaultCustomerSelector,
@@ -61,7 +61,9 @@ export class CustomerService {
 
       const customer = await prisma.customer.findFirst({
         where: { email },
-        select: defaultCustomerSelector,
+        select: {
+          ...defaultCustomerSelector,
+        },
       });
 
       if (!customer) {
