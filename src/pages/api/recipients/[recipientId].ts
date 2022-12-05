@@ -14,7 +14,9 @@ export default catchAsync(async function handle(req, res) {
 
   switch (req.method) {
     case "DELETE": {
-      const { id } = await TokenService.requireAuth(req);
+      const {
+        payload: { id },
+      } = await TokenService.requireAuth(req);
 
       const canDelete = await RecipientService.canDeleteRecipient(
         recipientId,
@@ -31,7 +33,9 @@ export default catchAsync(async function handle(req, res) {
       break;
     }
     case "GET": {
-      const { id } = await TokenService.requireAuth(req);
+      const {
+        payload: { id },
+      } = await TokenService.requireAuth(req);
 
       const canGet = await RecipientService.canGetRecipient(recipientId, id);
 
@@ -45,7 +49,9 @@ export default catchAsync(async function handle(req, res) {
       break;
     }
     case "PUT": {
-      const { id } = await TokenService.requireAuth(req);
+      const {
+        payload: { id },
+      } = await TokenService.requireAuth(req);
 
       validateSchema(updateRecipientSchema, req.body);
 

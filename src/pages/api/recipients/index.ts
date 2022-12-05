@@ -17,7 +17,9 @@ export default catchAsync(async function handle(req, res) {
   switch (req.method) {
     case "POST": {
       //   validateSchema(loginValidate, req.body);
-      const { id } = await TokenService.requireAuth(req);
+      const {
+        payload: { id },
+      } = await TokenService.requireAuth(req);
 
       const { accountNumber, mnemonicName } = req.body;
       const result = await RecipientService.createRecipient({
@@ -42,7 +44,9 @@ export default catchAsync(async function handle(req, res) {
       break;
     }
     case "GET": {
-      const { id } = await TokenService.requireAuth(req);
+      const {
+        payload: { id },
+      } = await TokenService.requireAuth(req);
 
       const { offset, limit } = req.query;
       validateSchema(getAllRecipientsSchema, req.query);

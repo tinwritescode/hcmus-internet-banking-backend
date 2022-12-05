@@ -13,7 +13,9 @@ export default catchAsync(async function handle(req, res) {
   switch (req.method) {
     case "POST":
       validateSchema(internalTransferSchema, req.body);
-      const { id } = await TokenService.requireAuth(req);
+      const {
+        payload: { id },
+      } = await TokenService.requireAuth(req);
 
       const amount = BigInt(req.body.amount);
       const to = req.body.to as string;
