@@ -68,13 +68,14 @@ export class CustomerService {
         throw new ApiError("Invalid credentials", 401);
       }
 
-      const tokens = await Promise.all([
-        TokenService.generateToken(
-          TokenType.REFRESH,
-          moment()
-            .add(process.env.REFRESH_TOKEN_EXPIRES_IN || "7d")
-            .toDate()
-        ).then((token) => token?.token),
+      const [refreshToken, accessToken] = await Promise.all([
+        TokenService.generateToken({
+          type: TokenType.REFRESH,
+          expiredAt: moment()
+            .add(process.env.REFRESH_TOKEN_EXPIRES_IN_DAYS || 7, "days")
+            .toDate(),
+          customerId: customer.id,
+        }).then((token) => token?.token),
         TokenService.generateAccessToken(
           { id: customer.id },
           process.env.ACCESS_TOKEN_EXPIRES_IN || "15m"
@@ -84,8 +85,8 @@ export class CustomerService {
       return {
         ...customer,
         tokens: {
-          refreshToken: tokens[0],
-          accessToken: tokens[1],
+          refreshToken: refreshToken,
+          accessToken: accessToken,
         },
       };
     } catch (error) {
@@ -165,7 +166,7 @@ export class CustomerService {
     });
   };
 
-  static getCustomerByRefreshToken = async (refreshToken: any) => {
+  static getCustomerByRefreshToken = async (refreshToken: string) => {
     const token = await TokenService.getToken(refreshToken);
 
     if (!token) {

@@ -23,16 +23,26 @@ export interface AccessTokenPayload extends JwtPayload {
 export const COOKIES_TOKEN_NAME = "accessToken";
 
 export class TokenService {
-  static generateToken = async (
-    type: TokenType,
-    expiredAt: Date
-  ): Promise<DefaultTokenSelector | null> => {
+  static generateToken = async ({
+    expiredAt,
+    type,
+    customerId,
+  }: {
+    type: TokenType;
+    expiredAt: Date;
+    customerId?: string;
+  }): Promise<DefaultTokenSelector | null> => {
     try {
       const token = await prisma.token.create({
         data: {
           type,
           expiredAt,
           token: randomUUID(),
+          Customer: {
+            connect: {
+              id: customerId,
+            },
+          },
         },
         select: defaultTokenSelector,
       });
@@ -65,7 +75,6 @@ export class TokenService {
   ): Promise<DefaultTokenSelector | null> => {
     const tokenData = await prisma.token.findFirst({
       where: { token },
-      select: defaultTokenSelector,
     });
 
     return tokenData;
@@ -135,13 +144,12 @@ export class TokenService {
       },
     });
 
-    console.log("tokenData", tokenData);
-
     if (!tokenData) {
       return false;
     }
 
     if (tokenData.expiredAt < new Date()) {
+      console.log(tokenData.expiredAt, new Date());
       return false;
     }
 

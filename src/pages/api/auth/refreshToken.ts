@@ -7,7 +7,7 @@ import { ApiError } from "../../../base/baseResponse";
 import moment from "moment";
 
 const refreshTokenValidate = z.object({
-  refreshToken: z.string(),
+  refreshToken: z.string().min(1),
 });
 
 export default catchAsync(async function handle(req, res) {
