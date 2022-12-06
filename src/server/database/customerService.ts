@@ -74,8 +74,12 @@ export class CustomerService {
         TokenService.generateToken({
           type: TokenType.REFRESH,
           expiredAt: moment()
-            .add(process.env.REFRESH_TOKEN_EXPIRES_IN_DAYS || 7, "days")
+            .add(
+              parseInt(process.env.REFRESH_TOKEN_EXPIRES_IN_DAYS) || 30,
+              "days"
+            )
             .toDate(),
+
           customerId: customer.id,
         }).then((token) => token?.token),
         TokenService.generateAccessToken(
