@@ -8,10 +8,20 @@ import {
   COOKIES_TOKEN_NAME,
 } from "../../../server/database/tokenService";
 
+const createRecipientSchema = z.object({
+  accountNumber: z
+    .string()
+    .min(1, { message: "Account number is shorter than 1 character" }),
+  mnemonicName: z
+    .string()
+    .min(1, { message: "Mnemonic name is shorter than 1 character" })
+    .max(50, { message: "Mnemonic name is longer than 50 characters" }),
+});
+
 export default catchAsync(async function handle(req, res) {
   switch (req.method) {
     case "POST": {
-      //   validateSchema(loginValidate, req.body);
+      validateSchema(createRecipientSchema, req.body);
       const {
         payload: { id },
       } = await TokenService.requireAuth(req);
