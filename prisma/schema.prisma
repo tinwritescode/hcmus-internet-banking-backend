@@ -24,6 +24,7 @@ model Customer {
   receivedDebts Debt[]         @relation("receivedDebts")
   Notification  Notification[]
   Token         Token[]
+  Recipient     Recipient[]    @relation("internalBankCustomer")
 
   @@map("customers")
 }
@@ -34,6 +35,9 @@ model Recipient {
   mnemonicName      String?             @map("mnemonic_name")
   CustomerRecipient CustomerRecipient[]
   Transactions      Transaction[]
+
+  internalBankCustomerId String?   @map("internal_bank_customer_id")
+  InternalBankCustomer   Customer? @relation("internalBankCustomer", fields: [internalBankCustomerId], references: [id])
 
   @@map("recipients")
 }
