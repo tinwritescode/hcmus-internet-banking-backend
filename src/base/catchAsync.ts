@@ -9,6 +9,7 @@ import { runMiddleware } from "./runMiddleware";
 const cors = Cors({
   methods: ["GET", "HEAD", "POST", "PUT", "DELETE"],
   origin: "*",
+  maxAge: 7 * 24 * 60 * 60,
 });
 
 /// A function that validate the request body or query string
