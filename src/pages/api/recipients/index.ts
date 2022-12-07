@@ -31,7 +31,7 @@ export default catchAsync(async function handle(req, res) {
 
       const { accountNumber, mnemonicName, isInternalbank } = req.body;
 
-      if (isInternalbank) {
+      if (isInternalbank === "true") {
         const customer = await CustomerService.getCustomerByBankNumber(
           accountNumber
         );
