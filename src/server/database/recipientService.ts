@@ -7,6 +7,14 @@ export class RecipientService {
     id: true,
     accountNumber: true,
     mnemonicName: true,
+    InternalBankCustomer: {
+      select: {
+        id: true,
+        accountNumber: true,
+        lastName: true,
+        firstName: true,
+      },
+    },
   };
 
   static createRecipient = async (recipient: Prisma.RecipientCreateInput) => {
