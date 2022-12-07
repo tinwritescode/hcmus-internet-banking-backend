@@ -30,16 +30,28 @@ export default catchAsync(async function handle(req, res) {
       } = await TokenService.requireAuth(req);
 
       const { accountNumber, mnemonicName, isInternalbank } = req.body;
+
+      if (isInternalbank) {
+        const customer = await CustomerService.getCustomerByBankNumber(
+          accountNumber
+        );
+
+        if (!customer) {
+          res.status(400).json({
+            error: { message: "Customer not found" },
+          });
+          return;
+        }
+      }
+
       const result = await RecipientService.createRecipient({
         accountNumber,
         mnemonicName,
-        InternalBankCustomer: isInternalbank
-          ? {
-              connect: {
-                id,
-              },
-            }
-          : undefined,
+        InternalBankCustomer: {
+          connect: {
+            id,
+          },
+        },
         CustomerRecipient: {
           connectOrCreate: {
             where: {
