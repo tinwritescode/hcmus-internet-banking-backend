@@ -1,4 +1,8 @@
-import { BaseResponse, PagingResponse } from "./../../base/baseResponse";
+import {
+  ApiError,
+  BaseResponse,
+  PagingResponse,
+} from "./../../base/baseResponse";
 import { Prisma } from "@prisma/client";
 import prisma from "../../lib/prisma";
 
@@ -18,9 +22,18 @@ export class RecipientService {
   };
 
   static createRecipient = async (recipient: Prisma.RecipientCreateInput) => {
-    return await prisma.recipient.create({
-      data: recipient,
-    });
+    try {
+      return await prisma.recipient.create({
+        data: recipient,
+      });
+    } catch (error) {
+      // P2002
+      if (error.code === "P2002") {
+        throw new ApiError("Recipient already exists", 400);
+      }
+
+      throw new ApiError("Something went wrong", 500);
+    }
   };
 
   static deleteRecipient = async (id: string) => {
