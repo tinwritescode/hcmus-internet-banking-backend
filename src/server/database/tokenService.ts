@@ -119,7 +119,7 @@ export class TokenService {
     }
   };
 
-  static requireNotAuth = async <T>(req: NextApiRequest): Promise<void> => {
+  static requireNotAuth = async (req: NextApiRequest): Promise<void> => {
     const token = req.headers.authorization?.split(" ")[1];
 
     if (token) {

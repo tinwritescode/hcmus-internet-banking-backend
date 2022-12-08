@@ -6,6 +6,7 @@ import { CustomerService } from "../../../server/database/customerService";
 const loginValidate = z.object({
   email: z.string().email(),
   password: z.string().min(8),
+  captchaValue: z.string(),
 });
 
 export default catchAsync(async function handle(req, res) {
