@@ -1,3 +1,5 @@
+import { ApiError } from "./../../../base/baseResponse";
+import { GoogleRecaptchaService } from "./../../../server/googleRecaptchaService";
 import { TokenService } from "./../../../server/database/tokenService";
 import { z } from "zod";
 import { catchAsync, validateSchema } from "../../../base/catchAsync";
@@ -15,7 +17,12 @@ export default catchAsync(async function handle(req, res) {
       validateSchema(loginValidate, req.body);
       await TokenService.requireNotAuth(req);
 
-      const { email, password } = req.body;
+      const { email, password, captchaValue } = req.body;
+
+      if (!(await GoogleRecaptchaService.validateRecaptcha(captchaValue))) {
+        throw new ApiError("Invalid captcha", 400);
+      }
+
       const result = await CustomerService.authenticateCustomer(
         email,
         password
