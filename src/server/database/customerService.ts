@@ -153,7 +153,7 @@ export class CustomerService {
   };
 
   static getCustomerByBankNumber = async (to: string) => {
-    return await prisma.customer.findUnique({
+    return await prisma.customer.findUniqueOrThrow({
       where: { accountNumber: to },
       select: { ...defaultCustomerSelector },
     });

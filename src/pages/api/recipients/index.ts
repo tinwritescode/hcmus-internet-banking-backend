@@ -32,16 +32,7 @@ export default catchAsync(async function handle(req, res) {
       const { accountNumber, mnemonicName, isInternalbank } = req.body;
 
       if (isInternalbank === "true") {
-        const customer = await CustomerService.getCustomerByBankNumber(
-          accountNumber
-        );
-
-        if (!customer) {
-          res.status(400).json({
-            error: { message: "Customer not found" },
-          });
-          return;
-        }
+        await CustomerService.getCustomerByBankNumber(accountNumber as string);
       }
 
       const result = await RecipientService.createRecipient({
