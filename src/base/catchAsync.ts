@@ -45,6 +45,17 @@ export const catchAsync = (
         }
 
         if (err instanceof Prisma.PrismaClientKnownRequestError) {
+          // P2025
+          if (err.code === "P2025") {
+            return res.status(404).json({
+              error: {
+                message: err.message,
+                stackTrace: isDev ? stackTrace : undefined,
+                ...err,
+              },
+            } as any);
+          }
+
           return res.status(400).json({
             error: {
               message: err.message,

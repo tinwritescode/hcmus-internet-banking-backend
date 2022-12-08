@@ -29,9 +29,10 @@ export default catchAsync(async function handle(req, res) {
         payload: { id },
       } = await TokenService.requireAuth(req);
 
-      const { accountNumber, mnemonicName, isInternalbank } = req.body;
+      const { accountNumber, mnemonicName } = req.body;
+      const isInternalBank = req.body.isInternalBank || true;
 
-      if (isInternalbank === "true") {
+      if (isInternalBank) {
         await CustomerService.getCustomerByBankNumber(accountNumber as string);
       }
 
