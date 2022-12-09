@@ -14,8 +14,8 @@ const createRecipientSchema = z.object({
     .min(1, { message: "Account number is shorter than 1 character" }),
   mnemonicName: z
     .string()
-    .min(1, { message: "Mnemonic name is shorter than 1 character" })
-    .max(50, { message: "Mnemonic name is longer than 50 characters" }),
+    .max(50, { message: "Mnemonic name is longer than 50 characters" })
+    .optional(),
   isInternalBank: z
     .preprocess((value) => value === "true", z.boolean())
     .default(true),
@@ -29,7 +29,9 @@ export default catchAsync(async function handle(req, res) {
         payload: { id },
       } = await TokenService.requireAuth(req);
 
-      const { accountNumber, mnemonicName } = req.body;
+      const { accountNumber } = req.body;
+      let mnemonicName = req.body.mnemonicName;
+
       const isInternalBank = req.body.isInternalBank || true;
 
       if (isInternalBank) {
