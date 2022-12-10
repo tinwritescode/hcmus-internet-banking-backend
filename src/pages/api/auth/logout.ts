@@ -9,7 +9,7 @@ const logoutValidate = z.object({
 
 export default catchAsync(async function handle(req, res) {
   switch (req.method) {
-    case "POST":
+    case "POST": {
       validateSchema(logoutValidate, req.body);
       await TokenService.requireAuth(req);
       const { refreshToken } = req.body;
@@ -18,9 +18,11 @@ export default catchAsync(async function handle(req, res) {
 
       res.status(200).json({ data: result });
       break;
-    default:
+    }
+    default: {
       res.status(405).json({
         error: { message: "Method not allowed" },
       });
+    }
   }
 });

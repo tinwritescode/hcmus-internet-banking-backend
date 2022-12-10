@@ -8,6 +8,7 @@ export class GoogleRecaptchaService {
         method: "POST",
 
         headers: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
         },
 

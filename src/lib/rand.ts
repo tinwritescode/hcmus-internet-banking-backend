@@ -1,3 +1,3 @@
-export const getRandomBankNumber = (length: number = 10) => {
+export const getRandomBankNumber = (length = 10) => {
   return Math.floor(Math.random() * Math.pow(10, length));
 };

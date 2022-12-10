@@ -1,9 +1,7 @@
-import { GetServerSideProps } from "next";
+import React from "react";
 
-type Props = {};
-
-function Index({}: Props) {
+function IndexPage() {
   return <div>Hi there</div>;
 }
 
-export default Index;
+export default IndexPage;
