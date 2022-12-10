@@ -1,7 +1,7 @@
 import React from "react";
 
-function IndexPage() {
+function dexPage() {
   return <div>Hi there</div>;
 }
 
-export default IndexPage;
+export default dexPage;

@@ -1,27 +1,15 @@
 {
   "plugins": ["@typescript-eslint"],
-  "extends": ["next/core-web-vitals", "plugin:@typescript-eslint/recommended"],
-  "overrides": [
-    {
-      "files": ["**/*.tsx"],
-      "rules": {
-        "@typescript-eslint/naming-convention": [
-          "error",
-          {
-            "selector": "function",
-            "format": ["PascalCase", "camelCase"]
-          }
-        ]
-      }
-    }
+  "extends": [
+    "next/core-web-vitals",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:react/recommended"
   ],
   "rules": {
-    // I suggest you add those two rules:
+    "react/jsx-pascal-case": 2,
     "@typescript-eslint/no-unused-vars": "warn",
     "@typescript-eslint/no-explicit-any": "warn",
     "@typescript-eslint/ban-ts-comment": "off",
-
-    // naming
     "@typescript-eslint/naming-convention": [
       "error",
       {
@@ -48,5 +36,8 @@
         "format": ["PascalCase"]
       }
     ]
+  },
+  "parserOptions": {
+    "project": "./tsconfig.json"
   }
 }
