@@ -1,6 +1,5 @@
 import { InvoiceService } from "./../../../server/database/invoiceService";
-import { RecipientService } from "../../../server/database/recipientService";
-import { z } from "zod";
+import { custom, z } from "zod";
 import { catchAsync, validateSchema } from "../../../base/catchAsync";
 import { CustomerService } from "../../../server/database/customerService";
 import { TokenService } from "../../../server/database/tokenService";
@@ -10,7 +9,7 @@ const createInvoiceSchema = z.object({
   accountNumber: z
     .string()
     .min(1, { message: "Account number is shorter than 1 character" }),
-  amount: z.preprocess(parseInt, z.number().min(1)),
+  amount: z.preprocess(BigInt, z.bigint()),
   isInternalBank: z
     .preprocess((value) => value === "true", z.boolean())
     .default(true),
@@ -25,25 +24,22 @@ export default catchAsync(async function handle(req, res) {
       const {
         payload: { id },
       } = await TokenService.requireAuth(req);
-      const {
-        accountNumber,
-        isInternalBank = true,
-        amount,
-        message,
-      } = req.body;
-      const [customer, user] = await Promise.all([
-        CustomerService.getCustomerByBankNumber(accountNumber as string),
-        CustomerService.getCustomerById(id, { withBalance: true }),
-      ]);
+      const { accountNumber, amount, message } = req.body;
+      const customer = await CustomerService.getCustomerByBankNumber(
+        accountNumber as string
+      );
       const amountNum = parseInt(amount);
+      const isInternalBank = req.body.isInternalBank === "true";
 
-      if (user.balance < amountNum) {
-        throw new ApiError("Insufficient funds", 400);
-      }
+      console.log(req.body);
+
       if (!isInternalBank) {
-        throw new Error("External bank not supported");
+        throw new ApiError("External bank has note supported yet.", 400);
       } else {
         await CustomerService.getCustomerByBankNumber(accountNumber as string);
+        if (id === customer.accountNumber) {
+          throw new ApiError("You can't pay to yourself", 400);
+        }
       }
 
       const result = await InvoiceService.createInvoice({
@@ -70,13 +66,13 @@ export default catchAsync(async function handle(req, res) {
       } = await TokenService.requireAuth(req);
 
       const { offset, limit } = req.query;
-      const recipients = await RecipientService.getRecipientsByCustomerId(
+      const invoices = await InvoiceService.getInvoicesByReceiverId(
         id,
         parseInt((offset as string) || "0"),
         parseInt((limit as string) || "10")
       );
 
-      res.status(200).json({ data: recipients });
+      res.status(200).json({ data: invoices });
       break;
     }
     default: {

@@ -13,6 +13,7 @@ const cors = Cors({
 });
 
 /// A function that validate the request body or query string
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const validateSchema = <T>(schema: z.ZodSchema<T>, data: any) => {
   try {
     schema.parse(data);

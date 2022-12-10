@@ -1,8 +1,5 @@
-import {
-  ApiError,
-  BaseResponse,
-  PagingResponse,
-} from "../../base/baseResponse";
+import { defaultCustomerSelector } from "./customerService";
+import { ApiError, PagingResponse } from "../../base/baseResponse";
 import { Prisma } from "@prisma/client";
 import prisma from "../../lib/prisma";
 
@@ -10,8 +7,12 @@ export class InvoiceService {
   static defaultSelector: Prisma.InvoiceSelect = {
     id: true,
     amount: true,
-    creator: true,
-    customer: true,
+    creator: {
+      select: defaultCustomerSelector,
+    },
+    customer: {
+      select: defaultCustomerSelector,
+    },
     isPaid: true,
     paidAt: true,
     updatedAt: true,
@@ -60,7 +61,7 @@ export class InvoiceService {
     }
   };
 
-  static getInvoicesByCreatorId = async (
+  static getInvoicesByReceiverId = async (
     customerId: string,
     offset = 0,
     limit = 10
@@ -68,7 +69,7 @@ export class InvoiceService {
     try {
       const invoices = await prisma.invoice.findMany({
         where: {
-          creatorId: customerId,
+          receiverId: customerId,
         },
         select: InvoiceService.defaultSelector,
         skip: offset,
@@ -110,7 +111,8 @@ export class InvoiceService {
     );
   };
 
-  static getInvoice = async (invoiceId: string, id: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  static canGetInvoice = async (invoiceId: number | bigint, id: string) => {
     // TODO: Change later to match the need
     return true;
   };

@@ -5,7 +5,7 @@ import { ApiError } from "../../base/baseResponse";
 import prisma from "../../lib/prisma";
 import moment from "moment";
 
-const defaultCustomerSelector: Prisma.CustomerSelect = {
+export const defaultCustomerSelector: Prisma.CustomerSelect = {
   id: true,
   accountNumber: true,
   lastName: true,

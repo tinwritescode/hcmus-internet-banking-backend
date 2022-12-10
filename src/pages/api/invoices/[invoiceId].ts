@@ -1,16 +1,17 @@
+import { InvoiceService } from "./../../../server/database/invoiceService";
 import { validateSchema } from "../../../base/catchAsync";
-import { RecipientService } from "../../../server/database/recipientService";
 import { z } from "zod";
 import { catchAsync } from "../../../base/catchAsync";
 import { TokenService } from "../../../server/database/tokenService";
 import { ApiError } from "../../../base/baseResponse";
 
-const updateRecipientSchema = z.object({
-  mnemonicName: z.string().optional(),
+const updateInvoiceSchema = z.object({
+  amount: z.preprocess(BigInt, z.bigint()),
+  message: z.string().min(1),
 });
 
 export default catchAsync(async function handle(req, res) {
-  const recipientId = req.query.recipientId as string;
+  const invoiceId = BigInt(req.query.invoiceId as string);
 
   switch (req.method) {
     case "DELETE": {
@@ -18,16 +19,13 @@ export default catchAsync(async function handle(req, res) {
         payload: { id },
       } = await TokenService.requireAuth(req);
 
-      const canDelete = await RecipientService.canDeleteRecipient(
-        recipientId,
-        id
-      );
+      const canDelete = await InvoiceService.canDeleteInvoice(invoiceId, id);
 
       if (!canDelete) {
-        throw new ApiError("You can't delete this recipient", 403);
+        throw new ApiError("You can't delete this invoice", 403);
       }
 
-      const result = await RecipientService.deleteRecipient(recipientId);
+      const result = await InvoiceService.deleteInvoice(invoiceId);
 
       res.status(200).json({ data: result });
       break;
@@ -37,15 +35,15 @@ export default catchAsync(async function handle(req, res) {
         payload: { id },
       } = await TokenService.requireAuth(req);
 
-      const canGet = await RecipientService.canGetRecipient(recipientId, id);
+      const canGet = await InvoiceService.canGetInvoice(invoiceId, id);
 
       if (!canGet) {
-        throw new ApiError("You can't get this recipient", 403);
+        throw new ApiError("You can't get this invoice", 403);
       }
 
-      const recipients = await RecipientService.getRecipientById(recipientId);
+      const invoices = await InvoiceService.getInvoiceById(invoiceId);
 
-      res.status(200).json({ data: recipients });
+      res.status(200).json({ data: invoices });
       break;
     }
     case "PUT": {
@@ -53,30 +51,39 @@ export default catchAsync(async function handle(req, res) {
         payload: { id },
       } = await TokenService.requireAuth(req);
 
-      validateSchema(updateRecipientSchema, req.body);
+      validateSchema(updateInvoiceSchema, req.body);
 
-      const canUpdate = await RecipientService.canUpdateRecipient(
-        recipientId,
-        id
-      );
-
+      const canUpdate = await InvoiceService.canUpdateInvoice(invoiceId, id);
       if (!canUpdate) {
-        throw new ApiError("You can't update this recipient", 403);
+        throw new ApiError("You can't update this invoice", 403);
       }
 
-      const mnemonicName = req.body.mnemonicName as string;
+      const destInvoice = await InvoiceService.getInvoiceById(invoiceId);
+      if (!destInvoice) {
+        throw new ApiError("Invoice not found", 404);
+      }
+      if (destInvoice.isPaid) {
+        throw new ApiError("You can't update a paid invoice", 403);
+      }
 
-      const recipient = await RecipientService.updateRecipient(recipientId, {
-        mnemonicName,
+      const { amount, message } = req.body;
+      if (amount <= 0) {
+        throw new ApiError("Amount must be greater than 0", 400);
+      }
+
+      const invoice = await InvoiceService.updateInvoice(invoiceId, {
+        amount: amount,
+        message: message,
+        updatedAt: new Date(),
       });
 
-      res.status(200).json({ data: recipient });
+      res.status(200).json({ data: invoice });
       break;
     }
-
-    default:
+    default: {
       res.status(405).json({
         error: { message: "Method not allowed" },
       });
+    }
   }
 });
