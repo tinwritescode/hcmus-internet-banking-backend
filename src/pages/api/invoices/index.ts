@@ -4,42 +4,51 @@ import { z } from "zod";
 import { catchAsync, validateSchema } from "../../../base/catchAsync";
 import { CustomerService } from "../../../server/database/customerService";
 import { TokenService } from "../../../server/database/tokenService";
+import { ApiError } from "../../../base/baseResponse";
 
 const createInvoiceSchema = z.object({
   accountNumber: z
     .string()
     .min(1, { message: "Account number is shorter than 1 character" }),
-  mnemonicName: z
-    .string()
-    .max(50, { message: "Mnemonic name is longer than 50 characters" })
-    .optional(),
+  amount: z.preprocess(parseInt, z.number().min(1)),
   isInternalBank: z
     .preprocess((value) => value === "true", z.boolean())
     .default(true),
+  message: z.string().min(1),
 });
 
 export default catchAsync(async function handle(req, res) {
   switch (req.method) {
     case "POST": {
       validateSchema(createInvoiceSchema, req.body);
+
       const {
         payload: { id },
       } = await TokenService.requireAuth(req);
+      const {
+        accountNumber,
+        isInternalBank = true,
+        amount,
+        message,
+      } = req.body;
+      const [customer, user] = await Promise.all([
+        CustomerService.getCustomerByBankNumber(accountNumber as string),
+        CustomerService.getCustomerById(id, { withBalance: true }),
+      ]);
+      const amountNum = parseInt(amount);
 
-      const { accountNumber } = req.body;
-      const mnemonicName = req.body.mnemonicName;
-      const isInternalBank = req.body.isInternalBank || true;
-      const customer = await CustomerService.getCustomerByBankNumber(
-        accountNumber as string
-      );
-      const amount = parseInt(req.body.amount);
-
-      if (isInternalBank) {
+      if (user.balance < amountNum) {
+        throw new ApiError("Insufficient funds", 400);
+      }
+      if (!isInternalBank) {
+        throw new Error("External bank not supported");
+      } else {
         await CustomerService.getCustomerByBankNumber(accountNumber as string);
       }
 
       const result = await InvoiceService.createInvoice({
-        amount: 100,
+        amount: amountNum,
+        message,
         creator: {
           connect: {
             id,
@@ -47,7 +56,7 @@ export default catchAsync(async function handle(req, res) {
         },
         customer: {
           connect: {
-            id,
+            id: customer.id,
           },
         },
       });
@@ -70,9 +79,10 @@ export default catchAsync(async function handle(req, res) {
       res.status(200).json({ data: recipients });
       break;
     }
-    default:
+    default: {
       res.status(405).json({
         error: { message: "Method not allowed" },
       });
+    }
   }
 });

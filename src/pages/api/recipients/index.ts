@@ -32,6 +32,8 @@ export default catchAsync(async function handle(req, res) {
 
       if (isInternalBank) {
         await CustomerService.getCustomerByBankNumber(accountNumber as string);
+      } else {
+        throw new Error("External bank not supported");
       }
 
       const result = await RecipientService.createRecipient({

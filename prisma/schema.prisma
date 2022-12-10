@@ -84,6 +84,8 @@ model Invoice {
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
+  message String?
+
   receiverId String   @map("receiver_id")
   customer   Customer @relation("createdInvoices", fields: [receiverId], references: [id])
   creatorId  String   @map("created_by")

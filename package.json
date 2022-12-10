@@ -10,7 +10,8 @@
     "dev": "next",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:push": "npx prima db push"
   },
   "dependencies": {
     "@prisma/client": "4.7.0",
