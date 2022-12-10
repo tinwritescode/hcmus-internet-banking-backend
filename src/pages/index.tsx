@@ -1,3 +1,5 @@
+import { GetServerSideProps } from "next";
+
 type Props = {};
 
 function Index({}: Props) {

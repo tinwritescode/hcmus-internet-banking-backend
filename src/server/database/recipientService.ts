@@ -11,7 +11,7 @@ export class RecipientService {
     id: true,
     accountNumber: true,
     mnemonicName: true,
-    InternalBankCustomer: {
+    internalBankCustomer: {
       select: {
         id: true,
         accountNumber: true,
@@ -65,13 +65,13 @@ export class RecipientService {
 
   static getRecipientsByCustomerId = async (
     customerId: string,
-    offset: number = 0,
-    limit: number = 10
+    offset = 0,
+    limit = 10
   ) => {
     try {
       const recipients = await prisma.recipient.findMany({
         where: {
-          CustomerRecipient: {
+          customerRecipient: {
             some: {
               customerId: customerId,
             },
@@ -84,7 +84,7 @@ export class RecipientService {
 
       const total = await prisma.recipient.count({
         where: {
-          CustomerRecipient: {
+          customerRecipient: {
             some: {
               customerId: customerId,
             },
@@ -115,7 +115,7 @@ export class RecipientService {
       prisma.recipient.findFirst({
         where: {
           id: recipientId,
-          CustomerRecipient: {
+          customerRecipient: {
             some: {
               customerId: id,
             },
@@ -135,7 +135,7 @@ export class RecipientService {
       prisma.recipient.findFirst({
         where: {
           id: recipientId,
-          CustomerRecipient: {
+          customerRecipient: {
             some: {
               customerId: id,
             },

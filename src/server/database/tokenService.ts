@@ -38,7 +38,7 @@ export class TokenService {
           type,
           expiredAt,
           token: randomUUID(),
-          Customer: {
+          customer: {
             connect: {
               id: customerId,
             },

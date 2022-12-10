@@ -1,10 +1,11 @@
-import { RecipientService } from "./../../../server/database/recipientService";
+import { InvoiceService } from "./../../../server/database/invoiceService";
+import { RecipientService } from "../../../server/database/recipientService";
 import { z } from "zod";
 import { catchAsync, validateSchema } from "../../../base/catchAsync";
 import { CustomerService } from "../../../server/database/customerService";
 import { TokenService } from "../../../server/database/tokenService";
 
-const createRecipientSchema = z.object({
+const createInvoiceSchema = z.object({
   accountNumber: z
     .string()
     .min(1, { message: "Account number is shorter than 1 character" }),
@@ -20,40 +21,33 @@ const createRecipientSchema = z.object({
 export default catchAsync(async function handle(req, res) {
   switch (req.method) {
     case "POST": {
-      validateSchema(createRecipientSchema, req.body);
+      validateSchema(createInvoiceSchema, req.body);
       const {
         payload: { id },
       } = await TokenService.requireAuth(req);
 
       const { accountNumber } = req.body;
       const mnemonicName = req.body.mnemonicName;
-
       const isInternalBank = req.body.isInternalBank || true;
+      const customer = await CustomerService.getCustomerByBankNumber(
+        accountNumber as string
+      );
+      const amount = parseInt(req.body.amount);
 
       if (isInternalBank) {
         await CustomerService.getCustomerByBankNumber(accountNumber as string);
       }
 
-      const result = await RecipientService.createRecipient({
-        accountNumber,
-        mnemonicName,
-        internalBankCustomer: {
+      const result = await InvoiceService.createInvoice({
+        amount: 100,
+        creator: {
           connect: {
             id,
           },
         },
-        customerRecipient: {
-          connectOrCreate: {
-            where: {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
-              customerId_recipientId: {
-                customerId: id,
-                recipientId: accountNumber,
-              },
-            },
-            create: {
-              customerId: id,
-            },
+        customer: {
+          connect: {
+            id,
           },
         },
       });

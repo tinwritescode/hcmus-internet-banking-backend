@@ -20,11 +20,11 @@ model Customer {
   CustomerRecipient CustomerRecipient[]
   Transaction       Transaction[]
 
-  createdDebts  Debt[]         @relation("createdDebts")
-  receivedDebts Debt[]         @relation("receivedDebts")
-  Notification  Notification[]
-  Token         Token[]
-  Recipient     Recipient[]    @relation("internalBankCustomer")
+  createdInvoices  Invoice[]      @relation("createdInvoices")
+  receivedInvoices Invoice[]      @relation("receivedInvoices")
+  notification     Notification[]
+  token            Token[]
+  recipient        Recipient[]    @relation("internalBankCustomer")
 
   @@map("customers")
 }
@@ -33,11 +33,11 @@ model Recipient {
   id                String              @id @default(uuid())
   accountNumber     String              @unique @map("account_number")
   mnemonicName      String?             @map("mnemonic_name")
-  CustomerRecipient CustomerRecipient[]
-  Transactions      Transaction[]
+  customerRecipient CustomerRecipient[]
+  transactions      Transaction[]
 
   internalBankCustomerId String?   @map("internal_bank_customer_id")
-  InternalBankCustomer   Customer? @relation("internalBankCustomer", fields: [internalBankCustomerId], references: [id])
+  internalBankCustomer   Customer? @relation("internalBankCustomer", fields: [internalBankCustomerId], references: [id])
 
   @@map("recipients")
 }
@@ -46,8 +46,8 @@ model CustomerRecipient {
   id          BigInt    @id @default(autoincrement())
   customerId  String    @map("customer_id")
   recipientId String    @map("recipient_id")
-  Customer    Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  Recipient   Recipient @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  customer    Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  recipient   Recipient @relation(fields: [recipientId], references: [id], onDelete: Cascade)
 
   @@unique([customerId, recipientId])
   @@index([customerId])
@@ -68,32 +68,32 @@ model Transaction {
   updatedAt   DateTime        @updatedAt @map("updated_at")
   deletedAt   DateTime?       @map("deleted_at")
   type        TransactionType
-  Customer    Customer        @relation(fields: [customerId], references: [id])
-  Recipient   Recipient?      @relation(fields: [recipientId], references: [id])
+  customer    Customer        @relation(fields: [customerId], references: [id])
+  recipient   Recipient?      @relation(fields: [recipientId], references: [id])
   // TODO: save external transaction data
 
   @@index([customerId])
   @@map("transactions")
 }
 
-model Debt {
+model Invoice {
   id     BigInt @id @default(autoincrement())
   amount BigInt
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  deletedAt DateTime @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
   receiverId String   @map("receiver_id")
-  Customer   Customer @relation("createdDebts", fields: [receiverId], references: [id])
+  customer   Customer @relation("createdInvoices", fields: [receiverId], references: [id])
   creatorId  String   @map("created_by")
-  Creator    Customer @relation("receivedDebts", fields: [creatorId], references: [id])
+  creator    Customer @relation("receivedInvoices", fields: [creatorId], references: [id])
 
   isPaid Boolean   @default(false) @map("is_paid")
   paidAt DateTime? @map("paid_at")
 
   @@index([creatorId, receiverId])
-  @@map("debts")
+  @@map("invoices")
 }
 
 enum NotificationType {
@@ -109,7 +109,7 @@ model Notification {
   deletedAt DateTime @map("deleted_at")
 
   customerId String   @map("customer_id")
-  Customer   Customer @relation(fields: [customerId], references: [id])
+  customer   Customer @relation(fields: [customerId], references: [id])
 
   type NotificationType
 
@@ -137,11 +137,11 @@ model Employee {
   firstName String @map("first_name")
   lastName  String @map("last_name")
 
-  EmployeeType EmployeeType
+  employeeType EmployeeType
 
   createdAt   DateTime      @default(now()) @map("created_at")
   updatedAt   DateTime      @updatedAt @map("updated_at")
-  EmployeeLog EmployeeLog[]
+  employeeLog EmployeeLog[]
 
   @@map("employees")
 }
@@ -159,7 +159,7 @@ model EmployeeLog {
   deletedAt DateTime @map("deleted_at")
 
   employeeId String   @map("employee_id")
-  Employee   Employee @relation(fields: [employeeId], references: [id])
+  employee   Employee @relation(fields: [employeeId], references: [id])
 
   type EmployeeLogType
   data String
@@ -197,7 +197,7 @@ model Token {
   isBlacklisted Boolean @default(false) @map("is_blacklisted")
 
   customerId String?   @map("customer_id")
-  Customer   Customer? @relation(fields: [customerId], references: [id])
+  customer   Customer? @relation(fields: [customerId], references: [id])
 
   @@map("tokens")
 }

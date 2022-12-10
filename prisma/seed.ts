@@ -9,14 +9,14 @@ const employeesData: Prisma.EmployeeCreateInput[] = [
     firstName: "Wednesday",
     lastName: "Addams",
     password: "password",
-    EmployeeType: "ADMIN",
+    employeeType: "ADMIN",
   },
   {
     email: "employee2@yopmail.com",
     firstName: "Thurday",
     lastName: "Addams",
     password: "password",
-    EmployeeType: "EMPLOYEE",
+    employeeType: "EMPLOYEE",
   },
 ];
 
