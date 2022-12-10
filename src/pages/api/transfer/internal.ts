@@ -7,6 +7,7 @@ import { TokenService } from "../../../server/database/tokenService";
 const internalTransferSchema = z.object({
   amount: z.preprocess(BigInt, z.bigint()).refine((amount) => amount > 0),
   to: z.string(),
+  message: z.string().optional(),
 });
 
 export default catchAsync(async function handle(req, res) {
@@ -19,6 +20,7 @@ export default catchAsync(async function handle(req, res) {
 
       const amount = BigInt(req.body.amount);
       const to = req.body.to as string;
+      const message = req.body.message as string;
 
       const receiverId = await CustomerService.getCustomerIdByBankNumber(to);
 
@@ -28,10 +30,11 @@ export default catchAsync(async function handle(req, res) {
 
       console.log("receiverId", receiverId);
 
-      const result = await CustomerService.transferToAnotherAccount({
+      const result = await CustomerService.transferInternally({
         from: id,
         to: receiverId,
         amount,
+        message,
       });
 
       res.status(200).json({ data: result });

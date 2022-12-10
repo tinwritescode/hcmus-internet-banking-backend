@@ -64,6 +64,7 @@ model Transaction {
   customerId  String          @map("customer_id")
   recipientId String?         @map("recipient_id")
   amount      BigInt
+  message     String?
   createdAt   DateTime        @default(now()) @map("created_at")
   updatedAt   DateTime        @updatedAt @map("updated_at")
   deletedAt   DateTime?       @map("deleted_at")

@@ -1,8 +1,4 @@
-import {
-  ApiError,
-  BaseResponse,
-  PagingResponse,
-} from "./../../base/baseResponse";
+import { ApiError, PagingResponse } from "./../../base/baseResponse";
 import { Prisma } from "@prisma/client";
 import prisma from "../../lib/prisma";
 

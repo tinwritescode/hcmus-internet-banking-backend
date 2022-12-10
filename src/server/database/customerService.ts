@@ -1,3 +1,4 @@
+import { RecipientService } from "./recipientService";
 import { comparePassword } from "./../../lib/bcrypt";
 import { TokenService } from "./tokenService";
 import { Prisma, TokenType } from "@prisma/client";
@@ -102,14 +103,16 @@ export class CustomerService {
     }
   };
 
-  static transferToAnotherAccount = async ({
+  static transferInternally = async ({
     amount,
     from,
     to,
+    message,
   }: {
     from: string;
     to: string;
-    amount: bigint;
+    amount: bigint | number;
+    message: string;
   }) => {
     const session = await prisma.$transaction([
       prisma.customer.update({
@@ -133,6 +136,25 @@ export class CustomerService {
         },
         select: {
           ...defaultCustomerSelector,
+        },
+      }),
+      prisma.transaction.create({
+        data: {
+          amount,
+          message,
+          type: "INTERNAL",
+          customerId: from,
+          recipientId: to,
+        },
+        select: {
+          id: true,
+          amount: true,
+          customer: {
+            select: defaultCustomerSelector,
+          },
+          recipient: {
+            select: RecipientService.defaultSelector,
+          },
         },
       }),
     ]);
