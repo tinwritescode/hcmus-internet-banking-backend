@@ -42,5 +42,10 @@ rules: {
       "selector": "typeLike",
       "format": ["PascalCase"]
     }
-  ]
+  ],
+  
+  # allow any
+  "@typescript-eslint/no-explicit-any": {
+     "severity": "warning"
+  }
 }
