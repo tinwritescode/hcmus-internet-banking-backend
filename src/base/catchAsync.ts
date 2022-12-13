@@ -69,6 +69,8 @@ export const catchAsync = (
         throw err;
       });
     } catch (err) {
+      console.log(err);
+
       return res.status(500).json({
         data: null,
         error: { message: err.message || undefined, data: err || undefined },

@@ -1,4 +1,3 @@
-import { RecipientService } from "./recipientService";
 import { comparePassword } from "./../../lib/bcrypt";
 import { TokenService } from "./tokenService";
 import { Prisma, TokenType } from "@prisma/client";
@@ -114,6 +113,32 @@ export class CustomerService {
     amount: bigint | number;
     message: string;
   }) => {
+    if (from === to) {
+      throw new ApiError("You can't transfer to yourself", 400);
+    }
+    console.log("from", from);
+    console.log("to", to);
+
+    await prisma.customer
+      .findUniqueOrThrow({
+        where: { id: to },
+      })
+      .catch(() => {
+        throw new ApiError("Invalid recipient", 400);
+      });
+
+    const customer = await prisma.customer
+      .findUniqueOrThrow({
+        where: { id: from },
+      })
+      .catch(() => {
+        throw new ApiError("Invalid sender", 400);
+      });
+
+    if (customer.balance < amount) {
+      throw new ApiError("Insufficient balance", 400);
+    }
+
     const session = await prisma.$transaction([
       prisma.customer.update({
         where: { id: from },
@@ -143,18 +168,15 @@ export class CustomerService {
           amount,
           message,
           type: "INTERNAL",
-          customerId: from,
-          recipientId: to,
+          fromCustomer: { connect: { id: from } },
+          toCustomer: { connect: { id: to } },
         },
         select: {
           id: true,
           amount: true,
-          customer: {
-            select: defaultCustomerSelector,
-          },
-          recipient: {
-            select: RecipientService.defaultSelector,
-          },
+          fromCustomerId: true,
+          toCustomerId: true,
+          recipientId: true,
         },
       }),
     ]);
@@ -162,9 +184,9 @@ export class CustomerService {
     return {
       from: session[0],
       to: session[1],
+      transaction: session[2],
     };
   };
-
   static getCustomerIdByBankNumber = async (to: string) => {
     return (
       await prisma.customer.findUnique({

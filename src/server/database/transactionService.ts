@@ -8,8 +8,8 @@ export class TransactionService {
   static defaultSelector: Prisma.TransactionSelect = {
     amount: true,
     createdAt: true,
-    customer: { select: defaultCustomerSelector },
-    recipient: { select: RecipientService.defaultSelector },
+    fromCustomer: { select: defaultCustomerSelector },
+    // recipient: { select: RecipientService.defaultSelector },
     message: true,
     id: true,
     type: true,
@@ -41,7 +41,7 @@ export class TransactionService {
       const [transactions, total] = await Promise.all([
         prisma.transaction.findMany({
           where: {
-            customerId: customerId,
+            fromCustomerId: customerId,
           },
           select: TransactionService.defaultSelector,
           skip: offset,
@@ -49,7 +49,7 @@ export class TransactionService {
         }),
         prisma.transaction.count({
           where: {
-            customerId: customerId,
+            fromCustomerId: customerId,
           },
         }),
       ]);

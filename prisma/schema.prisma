@@ -18,13 +18,13 @@ model Customer {
   lastName          String              @map("last_name")
   balance           BigInt              @default(0)
   CustomerRecipient CustomerRecipient[]
-  Transaction       Transaction[]
-
-  createdInvoices  Invoice[]      @relation("createdInvoices")
-  receivedInvoices Invoice[]      @relation("receivedInvoices")
-  notification     Notification[]
-  token            Token[]
-  recipient        Recipient[]    @relation("internalBankCustomer")
+  fromTransactions  Transaction[]       @relation("from_transactions")
+  toTransactions    Transaction[]       @relation("to_transactions")
+  createdInvoices   Invoice[]           @relation("createdInvoices")
+  receivedInvoices  Invoice[]           @relation("receivedInvoices")
+  recipient         Recipient[]         @relation("internalBankCustomer")
+  notification      Notification[]
+  token             Token[]
 
   @@map("customers")
 }
@@ -60,20 +60,23 @@ enum TransactionType {
 }
 
 model Transaction {
-  id          BigInt          @id @default(autoincrement())
-  customerId  String          @map("customer_id")
-  recipientId String?         @map("recipient_id")
-  amount      BigInt
-  message     String?
-  createdAt   DateTime        @default(now()) @map("created_at")
-  updatedAt   DateTime        @updatedAt @map("updated_at")
-  deletedAt   DateTime?       @map("deleted_at")
-  type        TransactionType
-  customer    Customer        @relation(fields: [customerId], references: [id])
-  recipient   Recipient?      @relation(fields: [recipientId], references: [id])
+  id             BigInt          @id @default(autoincrement())
+  fromCustomerId String          @map("from_customer_id")
+  toCustomerId   String          @map("to_customer_id")
+  recipientId    String?         @map("recipient_id")
+  amount         BigInt
+  message        String?
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+  deletedAt      DateTime?       @map("deleted_at")
+  type           TransactionType
   // TODO: save external transaction data
+  // Recipient   Recipient?      @relation(fields: [recipientId], references: [id])
+  fromCustomer   Customer        @relation("from_transactions", fields: [fromCustomerId], references: [id])
+  toCustomer     Customer?       @relation("to_transactions", fields: [toCustomerId], references: [id])
+  Recipient      Recipient?      @relation(fields: [recipientId], references: [id])
 
-  @@index([customerId])
+  @@index([fromCustomerId])
   @@map("transactions")
 }
 
