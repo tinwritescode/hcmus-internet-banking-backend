@@ -101,7 +101,7 @@ export class InvoiceService {
       const invoices = await prisma.invoice.findMany({
         where: {
           receiverId: customerId,
-          isPaid,
+          isPaid: isPaid,
         },
         select: InvoiceService.defaultSelector,
         skip: offset,

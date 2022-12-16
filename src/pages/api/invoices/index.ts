@@ -30,8 +30,6 @@ export default catchAsync(async function handle(req, res) {
         accountNumber as string
       );
 
-      console.log(req.body);
-
       if (!isInternalBank) {
         throw new ApiError("External bank has note supported yet.", 400);
       } else {
@@ -65,8 +63,9 @@ export default catchAsync(async function handle(req, res) {
       } = await TokenService.requireAuth(req);
 
       const { offset, limit } = req.query;
-      const isPaid: boolean | undefined = req.query.isPaid
-        ? req.query.isPaid === "true"
+      const isPaidString = req.query.isPaid as string | undefined;
+      const isPaid: boolean | undefined = isPaidString
+        ? isPaidString === "true"
         : undefined;
 
       const invoices = await InvoiceService.getInvoicesByReceiverId({
