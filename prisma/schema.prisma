@@ -191,6 +191,7 @@ enum TokenType {
   VERIFY_EMAIL
   REFRESH
   TRANSFER
+  ADMIN_REFRESH
 }
 
 model Token {

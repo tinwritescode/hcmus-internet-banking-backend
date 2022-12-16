@@ -216,13 +216,17 @@ export class CustomerService {
 
   static getCustomerById = async (
     id: string,
-    { withBalance = false }: { withBalance?: boolean }
+    {
+      withBalance = false,
+      withEmail = false,
+    }: { withBalance?: boolean; withEmail?: boolean }
   ) => {
     return await prisma.customer.findUnique({
       where: { id },
       select: {
         ...defaultCustomerSelector,
         ...(withBalance && { balance: true }),
+        ...(withEmail && { email: true }),
       },
     });
   };

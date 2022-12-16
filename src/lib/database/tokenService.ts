@@ -26,12 +26,10 @@ export class TokenService {
     expiredAt,
     type,
     customerId,
-    transactionId,
   }: {
     type: TokenType;
     expiredAt: Date;
     customerId?: string;
-    transactionId?: number | bigint;
   }): Promise<DefaultTokenSelector | null> => {
     try {
       const token = await prisma.token.create({
