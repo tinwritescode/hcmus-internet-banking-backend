@@ -66,11 +66,16 @@ export default catchAsync(async function handle(req, res) {
       } = await TokenService.requireAuth(req);
 
       const { offset, limit } = req.query;
-      const invoices = await InvoiceService.getInvoicesByReceiverId(
-        id,
-        parseInt((offset as string) || "0"),
-        parseInt((limit as string) || "10")
-      );
+      const isPaid: boolean | undefined = req.query.isPaid
+        ? req.query.isPaid === "true"
+        : undefined;
+
+      const invoices = await InvoiceService.getInvoicesByReceiverId({
+        customerId: id,
+        offset: parseInt((offset as string) || "0"),
+        limit: parseInt((limit as string) || "10"),
+        isPaid,
+      });
 
       res.status(200).json({ data: invoices });
       break;

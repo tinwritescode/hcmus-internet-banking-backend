@@ -1,3 +1,4 @@
+import { sendEmail } from "./../nodemailer";
 import { defaultCustomerSelector } from "./customerService";
 import { ApiError, PagingResponse } from "../../core/baseResponse";
 import { Prisma } from "@prisma/client";
@@ -35,11 +36,35 @@ export class InvoiceService {
   };
 
   static deleteInvoice = async (id: number | bigint) => {
-    return await prisma.invoice.delete({
+    const result = await prisma.invoice.delete({
       where: {
         id,
       },
+      include: {
+        creator: {
+          select: {
+            ...defaultCustomerSelector,
+            email: true,
+          },
+        },
+      },
     });
+
+    if (result === null) {
+      throw new ApiError("Invoice not found", 404);
+    }
+
+    sendEmail({
+      to: result.receiverId,
+      subject: "Invoice deleted",
+      html: `Invoice ${result.id} has been deleted\nCreator: ${
+        result.creator.firstName
+      } ${result.creator.lastName}\nAmount: ${result.amount}\n${
+        result.isPaid ? "Paid at: " + result.paidAt : ""
+      }}`,
+    });
+
+    return result;
   };
 
   static getInvoiceById = async (
@@ -61,11 +86,17 @@ export class InvoiceService {
     }
   };
 
-  static getInvoicesByReceiverId = async (
-    customerId: string,
+  static getInvoicesByReceiverId = async ({
+    customerId,
     offset = 0,
-    limit = 10
-  ) => {
+    limit = 10,
+    isPaid,
+  }: {
+    customerId: string;
+    isPaid?: boolean;
+    offset?: number;
+    limit?: number;
+  }) => {
     try {
       const invoices = await prisma.invoice.findMany({
         where: {
