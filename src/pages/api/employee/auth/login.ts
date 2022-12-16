@@ -16,7 +16,7 @@ export default catchAsync(async function handle(req, res) {
       validateSchema(loginValidate, req.body);
       await TokenService.requireNotAuth(req);
 
-      const { email, password } = req.body;
+      const { email, password } = loginValidate.parse(req.body);
       const result = await EmployeeService.authenticateEmployee(
         email,
         password

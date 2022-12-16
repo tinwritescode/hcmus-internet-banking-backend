@@ -14,7 +14,10 @@ export class EmployeeService {
 
   static createEmployee = async (employee: Prisma.EmployeeCreateInput) => {
     return await prisma.employee.create({
-      data: employee,
+      data: {
+        ...employee,
+        password: await hashPassword(employee.password),
+      },
     });
   };
 
@@ -37,10 +40,7 @@ export class EmployeeService {
 
       return employee;
     } catch (error) {
-      //TODO: Global handle error
-      console.log(error);
-
-      return null;
+      return Promise.reject(new ApiError("Invalid email or password", 401));
     }
   };
 
