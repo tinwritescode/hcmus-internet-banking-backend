@@ -1,4 +1,3 @@
-import { parseCookies } from "nookies";
 import { ApiError } from "./../../base/baseResponse";
 import { Prisma, TokenType } from "@prisma/client";
 import { randomUUID } from "crypto";
@@ -27,10 +26,12 @@ export class TokenService {
     expiredAt,
     type,
     customerId,
+    transactionId,
   }: {
     type: TokenType;
     expiredAt: Date;
     customerId?: string;
+    transactionId?: number | bigint;
   }): Promise<DefaultTokenSelector | null> => {
     try {
       const token = await prisma.token.create({

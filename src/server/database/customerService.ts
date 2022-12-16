@@ -4,6 +4,7 @@ import { Prisma, TokenType } from "@prisma/client";
 import { ApiError } from "../../base/baseResponse";
 import prisma from "../../lib/prisma";
 import moment from "moment";
+import { env } from "../../base/env/server.mjs";
 
 export const defaultCustomerSelector: Prisma.CustomerSelect = {
   id: true,
@@ -107,11 +108,13 @@ export class CustomerService {
     from,
     to,
     message,
+    payer,
   }: {
     from: string;
     to: string;
     amount: bigint | number;
     message: string;
+    payer: "sender" | "receiver";
   }) => {
     if (from === to) {
       throw new ApiError("You can't transfer to yourself", 400);
@@ -177,6 +180,14 @@ export class CustomerService {
           fromCustomerId: true,
           toCustomerId: true,
           recipientId: true,
+        },
+      }),
+      prisma.customer.update({
+        where: { id: payer === "sender" ? from : to },
+        data: {
+          balance: {
+            decrement: (amount as bigint) * BigInt(env.BASE_FEE),
+          },
         },
       }),
     ]);

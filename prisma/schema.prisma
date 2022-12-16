@@ -189,6 +189,7 @@ enum TokenType {
   RESET_PASSWORD
   VERIFY_EMAIL
   REFRESH
+  TRANSFER
 }
 
 model Token {

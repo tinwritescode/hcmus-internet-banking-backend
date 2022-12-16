@@ -1,8 +1,11 @@
-import { RecipientService } from "./recipientService";
+import { sendEmail } from "./../../lib/nodemailer";
+import { TokenService } from "./tokenService";
 import { defaultCustomerSelector } from "./customerService";
 import { ApiError, PagingResponse } from "./../../base/baseResponse";
-import { Prisma } from "@prisma/client";
+import { Prisma, TokenType } from "@prisma/client";
 import prisma from "../../lib/prisma";
+import moment from "moment";
+import { env } from "../../base/env/server.mjs";
 
 export class TransactionService {
   static defaultSelector: Prisma.TransactionSelect = {
@@ -71,8 +74,81 @@ export class TransactionService {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   static canGetTransaction = async (transactionId: string, id: string) => {
     // TODO: Change later to match the need
     return true;
+  };
+
+  static generateTransactionToken = async (customerId: string) => {
+    // if there is an existing token just in time
+    // return that token
+    const existingToken = await prisma.token.findFirst({
+      where: {
+        type: TokenType.TRANSFER,
+        expiredAt: {
+          gte: new Date(),
+        },
+      },
+    });
+
+    if (existingToken && existingToken.expiredAt > new Date()) {
+      throw new ApiError(
+        `Please wait ${moment(existingToken.expiredAt).fromNow()}`,
+        400
+      );
+    }
+
+    const result = await TokenService.generateToken({
+      type: TokenType.TRANSFER,
+      customerId,
+      expiredAt: moment()
+        .add(env.TRANSFER_TOKEN_EXPIRES_IN_MINUTE, "minutes")
+        .toDate(),
+    });
+    const userEmail = (
+      await prisma.customer.findFirst({
+        where: {
+          id: customerId,
+        },
+        select: {
+          email: true,
+        },
+      })
+    ).email;
+
+    sendEmail({
+      to: userEmail,
+      subject: "Transfer token",
+      html: `Your transfer token is ${result.token}`,
+    });
+
+    return result;
+  };
+
+  static verifyTransactionToken = async (token: string) => {
+    // return true if token is valid
+    const transactionToken = await prisma.token
+      .findFirstOrThrow({
+        where: {
+          token: token,
+          type: TokenType.TRANSFER,
+          expiredAt: {
+            gte: new Date(),
+          },
+        },
+      })
+      .catch(() => {
+        throw new ApiError("Invalid token", 400);
+      });
+
+    if (
+      !transactionToken.expiredAt ||
+      transactionToken.expiredAt < new Date()
+    ) {
+      throw new ApiError("Token expired", 400);
+    }
+
+    return transactionToken;
   };
 }
