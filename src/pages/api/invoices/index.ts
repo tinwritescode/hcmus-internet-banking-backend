@@ -1,5 +1,5 @@
 import { InvoiceService } from "../../../lib/database/invoiceService";
-import { custom, z } from "zod";
+import { z } from "zod";
 import { catchAsync, validateSchema } from "../../../core/catchAsync";
 import { CustomerService } from "../../../lib/database/customerService";
 import { TokenService } from "../../../lib/database/tokenService";
@@ -24,12 +24,11 @@ export default catchAsync(async function handle(req, res) {
       const {
         payload: { id },
       } = await TokenService.requireAuth(req);
-      const { accountNumber, amount, message } = req.body;
+      const { accountNumber, amount, isInternalBank, message } =
+        createInvoiceSchema.parse(req.body);
       const customer = await CustomerService.getCustomerByBankNumber(
         accountNumber as string
       );
-      const amountNum = parseInt(amount);
-      const isInternalBank = req.body.isInternalBank === "true";
 
       console.log(req.body);
 
@@ -43,7 +42,7 @@ export default catchAsync(async function handle(req, res) {
       }
 
       const result = await InvoiceService.createInvoice({
-        amount: amountNum,
+        amount,
         message,
         creator: {
           connect: {
