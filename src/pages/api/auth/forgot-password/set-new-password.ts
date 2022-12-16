@@ -1,9 +1,11 @@
 import { z } from "zod";
 import { catchAsync, validateSchema } from "../../../../core/catchAsync";
+import { CustomerService } from "../../../../lib/database/customerService";
 import { TokenService } from "../../../../lib/database/tokenService";
 
 const forgotPassword = z.object({
   token: z.string(),
+  newPassword: z.string(),
 });
 
 export default catchAsync(async function handle(req, res) {
@@ -12,7 +14,7 @@ export default catchAsync(async function handle(req, res) {
       validateSchema(forgotPassword, req.body);
 
       // eslint-disable-next-line no-case-declarations
-      const { token } = forgotPassword.parse(req.body);
+      const { token, newPassword } = forgotPassword.parse(req.body);
       const isValid = await TokenService.validateResetPasswordToken(token);
       if (!isValid) {
         res.status(400).json({
@@ -21,12 +23,14 @@ export default catchAsync(async function handle(req, res) {
         return;
       }
 
-      // extend more 15 minutes
-      await TokenService.extendToken(token, 15);
+      const customerId = (await TokenService.getToken(token)).customerId;
+
+      await TokenService.blackListToken(token);
+      await CustomerService.updatePassword(customerId, newPassword);
 
       res.status(200).json({
         data: {
-          message: "Token is valid",
+          message: "Password has been updated",
         },
       });
       break;

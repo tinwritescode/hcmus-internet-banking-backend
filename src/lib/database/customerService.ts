@@ -1,4 +1,4 @@
-import { comparePassword } from "../bcrypt";
+import { comparePassword, hashPassword } from "../bcrypt";
 import { TokenService } from "./tokenService";
 import { Prisma, TokenType } from "@prisma/client";
 import { ApiError } from "../../core/baseResponse";
@@ -268,6 +268,18 @@ export class CustomerService {
   static getCustomerByEmail = async (email: string) => {
     return await prisma.customer.findUnique({
       where: { email },
+      select: {
+        ...defaultCustomerSelector,
+      },
+    });
+  };
+
+  static updatePassword = async (id: string, password: string) => {
+    return await prisma.customer.update({
+      where: { id },
+      data: {
+        password: await hashPassword(password),
+      },
       select: {
         ...defaultCustomerSelector,
       },
