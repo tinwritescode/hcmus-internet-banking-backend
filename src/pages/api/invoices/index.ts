@@ -17,8 +17,8 @@ const createInvoiceSchema = z.object({
 });
 
 const getInvoicesSchema = z.object({
-  offset: z.number().min(0).default(0).optional(),
-  limit: z.number().min(1).max(100).default(10).optional(),
+  offset: z.preprocess(parseInt, z.number().min(0).default(0).optional()),
+  limit: z.preprocess(parseInt, z.number().min(1).default(10).optional()),
   isPaid: z.preprocess((value) => value === "true", z.boolean()).optional(),
 });
 
