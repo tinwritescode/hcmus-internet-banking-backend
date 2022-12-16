@@ -25,6 +25,7 @@ model Customer {
   recipient         Recipient[]         @relation("internalBankCustomer")
   notification      Notification[]
   token             Token[]
+  Log               Log[]
 
   @@map("customers")
 }
@@ -207,4 +208,19 @@ model Token {
   customer   Customer? @relation(fields: [customerId], references: [id])
 
   @@map("tokens")
+}
+
+model Log {
+  id        BigInt    @id @default(autoincrement())
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  type String
+  data String
+
+  customerId String?   @map("customer_id")
+  customer   Customer? @relation(fields: [customerId], references: [id])
+
+  @@map("logs")
 }

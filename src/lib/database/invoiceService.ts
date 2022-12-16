@@ -1,5 +1,5 @@
 import { sendEmail } from "./../nodemailer";
-import { defaultCustomerSelector } from "./customerService";
+import { CustomerService, defaultCustomerSelector } from "./customerService";
 import { ApiError, PagingResponse } from "../../core/baseResponse";
 import { Prisma } from "@prisma/client";
 import prisma from "../prisma";
@@ -101,6 +101,7 @@ export class InvoiceService {
       const invoices = await prisma.invoice.findMany({
         where: {
           receiverId: customerId,
+          isPaid,
         },
         select: InvoiceService.defaultSelector,
         skip: offset,
@@ -157,6 +158,77 @@ export class InvoiceService {
         },
       }) !== null
     );
+  };
+
+  static canPayInvoice = async (invoiceId: number | bigint, id: string) => {
+    return (
+      prisma.invoice.findFirst({
+        where: {
+          id: invoiceId,
+          receiverId: id,
+        },
+      }) !== null
+    );
+  };
+
+  static payInvoice = async ({
+    id,
+    payerId,
+  }: {
+    id: number | bigint;
+    payerId: string;
+  }) => {
+    const invoice = await prisma.invoice.findUnique({
+      where: {
+        id,
+      },
+    });
+    if (invoice === null) throw new ApiError("Invoice not found", 404);
+    if (invoice.isPaid) throw new ApiError("Invoice already paid", 400);
+    if (invoice.receiverId !== payerId)
+      throw new ApiError("You are not the receiver of this invoice", 400);
+
+    const receiver = await CustomerService.getCustomerById(
+      invoice.receiverId,
+      {}
+    );
+    if (receiver === null) throw new ApiError("Receiver not found", 404);
+    if (receiver.balance < invoice.amount)
+      throw new ApiError("Not enough balance", 400);
+
+    const result = await prisma.$transaction([
+      prisma.invoice.update({
+        where: {
+          id,
+        },
+        data: {
+          isPaid: true,
+          paidAt: new Date(),
+        },
+      }),
+      prisma.customer.update({
+        where: {
+          id: invoice.receiverId,
+        },
+        data: {
+          balance: {
+            decrement: invoice.amount,
+          },
+        },
+      }),
+      prisma.customer.update({
+        where: {
+          id: invoice.creatorId,
+        },
+        data: {
+          balance: {
+            increment: invoice.amount,
+          },
+        },
+      }),
+    ]);
+
+    return result[0];
   };
 
   static updateInvoice = async (

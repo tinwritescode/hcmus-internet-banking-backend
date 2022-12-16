@@ -1,3 +1,4 @@
+import { LogService } from "./../../../lib/database/logService";
 import { InvoiceService } from "../../../lib/database/invoiceService";
 import { validateSchema } from "../../../core/catchAsync";
 import { z } from "zod";
@@ -10,15 +11,21 @@ const updateInvoiceSchema = z.object({
   message: z.string().min(1),
 });
 
+const deleteInvoiceSchema = z.object({
+  reason: z.string().min(1),
+});
+
 export default catchAsync(async function handle(req, res) {
   const invoiceId = BigInt(req.query.invoiceId as string);
 
   switch (req.method) {
     case "DELETE": {
+      validateSchema(deleteInvoiceSchema, req.body);
       const {
         payload: { id },
       } = await TokenService.requireAuth(req);
 
+      const { reason } = deleteInvoiceSchema.parse(req.body);
       const canDelete = await InvoiceService.canDeleteInvoice(invoiceId, id);
 
       if (!canDelete) {
@@ -26,6 +33,11 @@ export default catchAsync(async function handle(req, res) {
       }
 
       const result = await InvoiceService.deleteInvoice(invoiceId);
+
+      LogService.createLog({
+        type: "DELETE_INVOICE",
+        data: `User ${id} deleted invoice ${invoiceId} with reason ${reason}`,
+      });
 
       res.status(200).json({ data: result });
       break;
