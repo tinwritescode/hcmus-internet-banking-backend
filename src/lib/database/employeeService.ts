@@ -96,6 +96,6 @@ export class EmployeeService {
       throw new ApiError("Invalid token", 401);
     }
 
-    return EmployeeService.getEmployeeById(token.customerId);
+    return await EmployeeService.getEmployeeById(token.employeeId);
   };
 }
