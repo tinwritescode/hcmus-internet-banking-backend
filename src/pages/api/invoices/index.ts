@@ -16,6 +16,12 @@ const createInvoiceSchema = z.object({
   message: z.string().min(1),
 });
 
+const getInvoicesSchema = z.object({
+  offset: z.number().min(0).default(0).optional(),
+  limit: z.number().min(1).max(100).default(10).optional(),
+  isPaid: z.preprocess((value) => value === "true", z.boolean()).optional(),
+});
+
 export default catchAsync(async function handle(req, res) {
   switch (req.method) {
     case "POST": {
@@ -62,16 +68,12 @@ export default catchAsync(async function handle(req, res) {
         payload: { id },
       } = await TokenService.requireAuth(req);
 
-      const { offset, limit } = req.query;
-      const isPaidString = req.query.isPaid as string | undefined;
-      const isPaid: boolean | undefined = isPaidString
-        ? isPaidString === "true"
-        : undefined;
+      const { offset, isPaid, limit } = getInvoicesSchema.parse(req.query);
 
       const invoices = await InvoiceService.getInvoicesByReceiverId({
         customerId: id,
-        offset: parseInt((offset as string) || "0"),
-        limit: parseInt((limit as string) || "10"),
+        offset,
+        limit,
         isPaid,
       });
 

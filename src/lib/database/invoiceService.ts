@@ -100,8 +100,8 @@ export class InvoiceService {
     try {
       const invoices = await prisma.invoice.findMany({
         where: {
-          receiverId: customerId,
-          isPaid: isPaid,
+          creatorId: customerId,
+          isPaid: isPaid ?? undefined,
         },
         select: InvoiceService.defaultSelector,
         skip: offset,
@@ -111,6 +111,7 @@ export class InvoiceService {
       const total = await prisma.invoice.count({
         where: {
           creatorId: customerId,
+          isPaid: isPaid ?? undefined,
         },
       });
 
