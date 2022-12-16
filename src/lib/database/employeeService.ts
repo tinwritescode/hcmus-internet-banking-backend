@@ -1,6 +1,8 @@
 import { hashPassword } from "../bcrypt";
 import { Prisma } from "@prisma/client";
 import prisma from "../prisma";
+import { TokenService } from "./tokenService";
+import { ApiError } from "../../core/baseResponse";
 
 export class EmployeeService {
   static defaultSelector: Prisma.EmployeeSelect = {
@@ -78,5 +80,15 @@ export class EmployeeService {
     } catch (error) {
       return null;
     }
+  };
+
+  static getEmployeeByRefreshToken = async (refreshToken: string) => {
+    const token = await TokenService.getToken(refreshToken);
+
+    if (!token) {
+      throw new ApiError("Invalid token", 401);
+    }
+
+    return EmployeeService.getEmployeeById(token.customerId);
   };
 }

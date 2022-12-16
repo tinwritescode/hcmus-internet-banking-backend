@@ -135,9 +135,18 @@ export class TokenService {
     });
   };
 
-  static validateRefreshToken = async (token: string): Promise<boolean> => {
+  static validateRefreshToken = async (
+    token: string,
+    options?: { isAdminToken: boolean }
+  ): Promise<boolean> => {
     const tokenData = await prisma.token.findFirst({
-      where: { token, type: TokenType.REFRESH, isBlacklisted: false },
+      where: {
+        token,
+        type: !options.isAdminToken
+          ? TokenType.REFRESH
+          : TokenType.ADMIN_REFRESH,
+        isBlacklisted: false,
+      },
       select: {
         expiredAt: true,
       },
