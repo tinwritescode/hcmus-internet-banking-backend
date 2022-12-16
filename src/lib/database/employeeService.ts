@@ -1,3 +1,4 @@
+import { comparePassword } from "./../bcrypt";
 import { hashPassword } from "../bcrypt";
 import { Prisma } from "@prisma/client";
 import prisma from "../prisma";
@@ -27,21 +28,27 @@ export class EmployeeService {
   ): Promise<Prisma.EmployeeGetPayload<{
     select: typeof EmployeeService.defaultSelector;
   }> | null> => {
-    const hashedPassword = await hashPassword(password);
+    const employeeWithPassword = await prisma.employee.findFirstOrThrow({
+      where: {
+        email: email,
+      },
+    });
 
-    try {
-      const employee = await prisma.employee.findFirst({
-        where: {
-          email: email,
-          password: hashedPassword,
-        },
-        select: EmployeeService.defaultSelector,
-      });
+    await comparePassword(password, employeeWithPassword.password).catch(
+      (e) => {
+        console.log(e);
+        console.log(password, employeeWithPassword.password);
 
-      return employee;
-    } catch (error) {
-      return Promise.reject(new ApiError("Invalid email or password", 401));
-    }
+        return Promise.reject(new ApiError("Invalid email or password", 401));
+      }
+    );
+
+    return await prisma.employee.findUnique({
+      where: {
+        email: email,
+      },
+      select: EmployeeService.defaultSelector,
+    });
   };
 
   static getEmployeeById = async (

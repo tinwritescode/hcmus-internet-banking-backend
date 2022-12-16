@@ -17,6 +17,7 @@ export default catchAsync(async function handle(req, res) {
       await TokenService.requireNotAuth(req);
 
       const { email, password } = loginValidate.parse(req.body);
+
       const result = await EmployeeService.authenticateEmployee(
         email,
         password
@@ -25,13 +26,13 @@ export default catchAsync(async function handle(req, res) {
       const [refreshToken, accessToken] = await Promise.all([
         TokenService.generateToken({
           type: "ADMIN_REFRESH",
-          customerId: result.id,
           expiredAt: moment()
             .add(env.REFRESH_TOKEN_EXPIRES_IN_DAYS, "days")
             .toDate(),
+          employeeId: result.id,
         }).then((token) => token?.token),
         TokenService.generateAccessToken(
-          { id: result.id },
+          { id: result.id, role: result.employeeType },
           env.ACCESS_TOKEN_EXPIRES_IN
         ),
       ]);

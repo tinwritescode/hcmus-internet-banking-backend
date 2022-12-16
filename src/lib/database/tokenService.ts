@@ -26,20 +26,31 @@ export class TokenService {
     expiredAt,
     type,
     customerId,
+    employeeId,
   }: {
     type: TokenType;
     expiredAt: Date;
+    // if have customer Id, then no employee Id and vice versa
     customerId?: string;
+    employeeId?: string;
   }): Promise<DefaultTokenSelector | null> => {
+    if (customerId && employeeId)
+      throw new Error("Both customer and employee id provided");
+
     try {
       const token = await prisma.token.create({
         data: {
           type,
           expiredAt,
           token: randomUUID(),
-          customer: {
+          customer: customerId && {
             connect: {
               id: customerId,
+            },
+          },
+          employee: employeeId && {
+            connect: {
+              id: employeeId,
             },
           },
         },

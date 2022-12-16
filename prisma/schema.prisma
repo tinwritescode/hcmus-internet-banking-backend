@@ -149,6 +149,7 @@ model Employee {
   createdAt   DateTime      @default(now()) @map("created_at")
   updatedAt   DateTime      @updatedAt @map("updated_at")
   employeeLog EmployeeLog[]
+  Token       Token[]
 
   @@map("employees")
 }
@@ -207,6 +208,9 @@ model Token {
 
   customerId String?   @map("customer_id")
   customer   Customer? @relation(fields: [customerId], references: [id])
+
+  employeeId String?   @map("employee_id")
+  employee   Employee? @relation(fields: [employeeId], references: [id])
 
   @@map("tokens")
 }
