@@ -7,6 +7,7 @@ export class EmployeeService {
     id: true,
     firstName: true,
     lastName: true,
+    employeeType: true,
   };
 
   static createEmployee = async (employee: Prisma.EmployeeCreateInput) => {

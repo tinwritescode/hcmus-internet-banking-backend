@@ -85,7 +85,7 @@ export class CustomerService {
         }).then((token) => token?.token),
         TokenService.generateAccessToken(
           { id: customer.id },
-          process.env.ACCESS_TOKEN_EXPIRES_IN || "15m"
+          process.env.ACCESS_TOKEN_EXPIRES_IN
         ),
       ]);
 
