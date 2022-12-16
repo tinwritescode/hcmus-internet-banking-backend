@@ -1,9 +1,9 @@
-import { validateSchema } from "./../../../base/catchAsync";
-import { RecipientService } from "../../../server/database/recipientService";
+import { validateSchema } from "../../../core/catchAsync";
+import { RecipientService } from "../../../lib/database/recipientService";
 import { z } from "zod";
-import { catchAsync } from "../../../base/catchAsync";
-import { TokenService } from "../../../server/database/tokenService";
-import { ApiError } from "../../../base/baseResponse";
+import { catchAsync } from "../../../core/catchAsync";
+import { TokenService } from "../../../lib/database/tokenService";
+import { ApiError } from "../../../core/baseResponse";
 
 const updateRecipientSchema = z.object({
   mnemonicName: z.string().optional(),

@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { catchAsync, validateSchema } from "../../../../base/catchAsync";
-import { CustomerService } from "../../../../server/database/customerService";
-import { TokenService } from "../../../../server/database/tokenService";
+import { catchAsync, validateSchema } from "../../../../core/catchAsync";
+import { CustomerService } from "../../../../lib/database/customerService";
+import { TokenService } from "../../../../lib/database/tokenService";
 
 const loginValidate = z.object({
   email: z.string().email(),

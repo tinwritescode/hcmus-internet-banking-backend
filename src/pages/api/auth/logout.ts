@@ -1,6 +1,6 @@
-import { validateSchema } from "./../../../base/catchAsync";
-import { TokenService } from "./../../../server/database/tokenService";
-import { catchAsync } from "../../../base/catchAsync";
+import { validateSchema } from "../../../core/catchAsync";
+import { TokenService } from "../../../lib/database/tokenService";
+import { catchAsync } from "../../../core/catchAsync";
 import { z } from "zod";
 
 const logoutValidate = z.object({

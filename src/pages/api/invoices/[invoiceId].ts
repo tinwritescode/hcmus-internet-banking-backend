@@ -1,9 +1,9 @@
-import { InvoiceService } from "./../../../server/database/invoiceService";
-import { validateSchema } from "../../../base/catchAsync";
+import { InvoiceService } from "../../../lib/database/invoiceService";
+import { validateSchema } from "../../../core/catchAsync";
 import { z } from "zod";
-import { catchAsync } from "../../../base/catchAsync";
-import { TokenService } from "../../../server/database/tokenService";
-import { ApiError } from "../../../base/baseResponse";
+import { catchAsync } from "../../../core/catchAsync";
+import { TokenService } from "../../../lib/database/tokenService";
+import { ApiError } from "../../../core/baseResponse";
 
 const updateInvoiceSchema = z.object({
   amount: z.preprocess(BigInt, z.bigint()),

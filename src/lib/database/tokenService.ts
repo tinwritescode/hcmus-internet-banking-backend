@@ -1,7 +1,7 @@
-import { ApiError } from "./../../base/baseResponse";
+import { ApiError } from "../../core/baseResponse";
 import { Prisma, TokenType } from "@prisma/client";
 import { randomUUID } from "crypto";
-import prisma from "../../lib/prisma";
+import prisma from "../prisma";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { NextApiRequest } from "next";
 

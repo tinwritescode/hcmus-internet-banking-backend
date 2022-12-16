@@ -1,8 +1,8 @@
-import { CustomerService } from "./../../../server/database/customerService";
-import { TransactionService } from "./../../../server/database/transactionService";
+import { CustomerService } from "../../../lib/database/customerService";
+import { TransactionService } from "../../../lib/database/transactionService";
 import { z } from "zod";
-import { catchAsync, validateSchema } from "../../../base/catchAsync";
-import { TokenService } from "../../../server/database/tokenService";
+import { catchAsync, validateSchema } from "../../../core/catchAsync";
+import { TokenService } from "../../../lib/database/tokenService";
 
 const internalTransferSchema = z.object({
   transactionId: z.string(),

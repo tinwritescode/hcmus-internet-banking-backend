@@ -1,4 +1,4 @@
-import { EmployeeService } from "./../src/server/database/employeeService";
+import { EmployeeService } from "../src/lib/database/employeeService";
 import { PrismaClient, Prisma } from "@prisma/client";
 
 const prisma = new PrismaClient();

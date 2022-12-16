@@ -1,9 +1,9 @@
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
-import { catchAsync, validateSchema } from "../../../base/catchAsync";
+import { catchAsync, validateSchema } from "../../../core/catchAsync";
 import { hashPassword } from "../../../lib/bcrypt";
 import { getRandomBankNumber } from "../../../lib/rand";
-import { CustomerService } from "../../../server/database/customerService";
+import { CustomerService } from "../../../lib/database/customerService";
 
 const registerValidate = z.object({
   email: z.string().email(),

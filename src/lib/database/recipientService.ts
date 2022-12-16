@@ -1,6 +1,6 @@
-import { ApiError, PagingResponse } from "./../../base/baseResponse";
+import { ApiError, PagingResponse } from "../../core/baseResponse";
 import { Prisma } from "@prisma/client";
-import prisma from "../../lib/prisma";
+import prisma from "../prisma";
 
 export class RecipientService {
   static defaultSelector: Prisma.RecipientSelect = {

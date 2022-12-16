@@ -1,6 +1,6 @@
 // @ts-check
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { env } from "./src/base/env/server.mjs";
+import { env } from "./src/core/env/server.mjs";
 
 /**
  * Don't be scared of the generics here.

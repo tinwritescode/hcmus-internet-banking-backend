@@ -1,9 +1,9 @@
-import { TransactionService } from "./../../../server/database/transactionService";
+import { TransactionService } from "../../../lib/database/transactionService";
 import { z } from "zod";
-import { ApiError } from "../../../base/baseResponse";
-import { catchAsync, validateSchema } from "../../../base/catchAsync";
-import { CustomerService } from "../../../server/database/customerService";
-import { TokenService } from "../../../server/database/tokenService";
+import { ApiError } from "../../../core/baseResponse";
+import { catchAsync, validateSchema } from "../../../core/catchAsync";
+import { CustomerService } from "../../../lib/database/customerService";
+import { TokenService } from "../../../lib/database/tokenService";
 
 const internalTransferSchema = z.object({
   amount: z.preprocess(BigInt, z.bigint()).refine((amount) => amount > 0),

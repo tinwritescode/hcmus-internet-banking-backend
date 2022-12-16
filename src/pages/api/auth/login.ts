@@ -1,8 +1,8 @@
-import { ApiError } from "./../../../base/baseResponse";
-import { GoogleRecaptchaService } from "./../../../server/googleRecaptchaService";
+import { ApiError } from "../../../core/baseResponse";
+import { GoogleRecaptchaService } from "../../../lib/googleRecaptchaService";
 import { z } from "zod";
-import { catchAsync, validateSchema } from "../../../base/catchAsync";
-import { CustomerService } from "../../../server/database/customerService";
+import { catchAsync, validateSchema } from "../../../core/catchAsync";
+import { CustomerService } from "../../../lib/database/customerService";
 
 const loginValidate = z.object({
   email: z.string().email(),

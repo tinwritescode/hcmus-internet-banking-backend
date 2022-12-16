@@ -1,8 +1,8 @@
-import { TokenService } from "../../../server/database/tokenService";
+import { TokenService } from "../../../lib/database/tokenService";
 import { z } from "zod";
-import { catchAsync, validateSchema } from "../../../base/catchAsync";
-import { CustomerService } from "../../../server/database/customerService";
-import { ApiError } from "../../../base/baseResponse";
+import { catchAsync, validateSchema } from "../../../core/catchAsync";
+import { CustomerService } from "../../../lib/database/customerService";
+import { ApiError } from "../../../core/baseResponse";
 
 const refreshTokenValidate = z.object({
   refreshToken: z.string().min(1),

@@ -1,10 +1,10 @@
-import { comparePassword } from "./../../lib/bcrypt";
+import { comparePassword } from "../bcrypt";
 import { TokenService } from "./tokenService";
 import { Prisma, TokenType } from "@prisma/client";
-import { ApiError } from "../../base/baseResponse";
-import prisma from "../../lib/prisma";
+import { ApiError } from "../../core/baseResponse";
+import prisma from "../prisma";
 import moment from "moment";
-import { env } from "../../base/env/server.mjs";
+import { env } from "../../core/env/server.mjs";
 
 export const defaultCustomerSelector: Prisma.CustomerSelect = {
   id: true,

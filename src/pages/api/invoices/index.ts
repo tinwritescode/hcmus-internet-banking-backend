@@ -1,9 +1,9 @@
-import { InvoiceService } from "./../../../server/database/invoiceService";
+import { InvoiceService } from "../../../lib/database/invoiceService";
 import { custom, z } from "zod";
-import { catchAsync, validateSchema } from "../../../base/catchAsync";
-import { CustomerService } from "../../../server/database/customerService";
-import { TokenService } from "../../../server/database/tokenService";
-import { ApiError } from "../../../base/baseResponse";
+import { catchAsync, validateSchema } from "../../../core/catchAsync";
+import { CustomerService } from "../../../lib/database/customerService";
+import { TokenService } from "../../../lib/database/tokenService";
+import { ApiError } from "../../../core/baseResponse";
 
 const createInvoiceSchema = z.object({
   accountNumber: z

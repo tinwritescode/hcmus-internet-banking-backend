@@ -1,11 +1,11 @@
-import { sendEmail } from "./../../lib/nodemailer";
+import { sendEmail } from "../nodemailer";
 import { TokenService } from "./tokenService";
 import { defaultCustomerSelector } from "./customerService";
-import { ApiError, PagingResponse } from "./../../base/baseResponse";
+import { ApiError, PagingResponse } from "../../core/baseResponse";
 import { Prisma, TokenType } from "@prisma/client";
-import prisma from "../../lib/prisma";
+import prisma from "../prisma";
 import moment from "moment";
-import { env } from "../../base/env/server.mjs";
+import { env } from "../../core/env/server.mjs";
 
 export class TransactionService {
   static defaultSelector: Prisma.TransactionSelect = {

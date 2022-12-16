@@ -1,6 +1,6 @@
-import { TransactionService } from "./../../../server/database/transactionService";
-import { catchAsync } from "../../../base/catchAsync";
-import { TokenService } from "../../../server/database/tokenService";
+import { TransactionService } from "../../../lib/database/transactionService";
+import { catchAsync } from "../../../core/catchAsync";
+import { TokenService } from "../../../lib/database/tokenService";
 
 export default catchAsync(async function handle(req, res) {
   switch (req.method) {

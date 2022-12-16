@@ -1,6 +1,6 @@
-import { hashPassword } from "./../../lib/bcrypt";
+import { hashPassword } from "../bcrypt";
 import { Prisma } from "@prisma/client";
-import prisma from "../../lib/prisma";
+import prisma from "../prisma";
 
 export class EmployeeService {
   static defaultSelector: Prisma.EmployeeSelect = {
