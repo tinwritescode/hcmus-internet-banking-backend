@@ -1,17 +1,11 @@
 import { CustomerService } from "../../../lib/database/customerService";
 import { TransactionService } from "../../../lib/database/transactionService";
-import { z } from "zod";
-import { catchAsync, validateSchema } from "../../../core/catchAsync";
+import { catchAsync } from "../../../core/catchAsync";
 import { TokenService } from "../../../lib/database/tokenService";
-
-const internalTransferSchema = z.object({
-  transactionId: z.string(),
-});
 
 export default catchAsync(async function handle(req, res) {
   switch (req.method) {
     case "POST":
-      validateSchema(internalTransferSchema, req.body);
       const {
         payload: { id },
       } = await TokenService.requireAuth(req);

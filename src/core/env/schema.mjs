@@ -18,7 +18,9 @@ export const serverSchema = z.object({
   EMAIL_USERNAME: z.string(),
   EMAIL_PASSWORD: z.string(),
   TRANSFER_TOKEN_EXPIRES_IN_MINUTE: z.preprocess(parseInt, z.number().int()),
-  BASE_FEE: z.preprocess(parseInt, z.number())
+  BASE_FEE: z.preprocess(parseInt, z.number()),
+  RESET_PASSWORD_TOKEN_EXPIRES_IN_MINUTE: z.preprocess(parseInt, z.number().int()),
+  FRONTEND_URL: z.string().url(),
   // NEXTAUTH_URL: z.preprocess(
   //   // This makes Vercel deployments not fail if you don't set NEXTAUTH_URL
   //   // Since NextAuth automatically uses the VERCEL_URL if present.

@@ -264,6 +264,15 @@ export class CustomerService {
 
     return await comparePassword(password, hashedPassword);
   };
+
+  static getCustomerByEmail = async (email: string) => {
+    return await prisma.customer.findUnique({
+      where: { email },
+      select: {
+        ...defaultCustomerSelector,
+      },
+    });
+  };
 }
 
 //@ts-ignore
