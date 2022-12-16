@@ -11,7 +11,9 @@ export default catchAsync(async function handle(req, res) {
       } = await TokenService.requireAuth(req);
 
       await TransactionService.generateTransactionToken(id);
-      const userEmail = (await CustomerService.getCustomerById(id, {})).email;
+      const userEmail = (
+        await CustomerService.getCustomerById(id, { withEmail: true })
+      ).email;
 
       res.status(200).json({
         data: {
