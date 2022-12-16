@@ -3,6 +3,7 @@ import { z } from "zod";
 import { catchAsync, validateSchema } from "../../../core/catchAsync";
 import { CustomerService } from "../../../lib/database/customerService";
 import { TokenService } from "../../../lib/database/tokenService";
+import { hashPassword } from "../../../lib/bcrypt";
 
 const changePasswordSchema = z.object({
   oldPassword: z
@@ -21,42 +22,18 @@ export default catchAsync(async function handle(req, res) {
         payload: { id },
       } = await TokenService.requireAuth(req);
 
-      const { accountNumber } = req.body;
-      const mnemonicName = req.body.mnemonicName;
+      const { newPassword, oldPassword } = changePasswordSchema.parse(req.body);
 
-      const isInternalBank = req.body.isInternalBank || true;
-
-      if (isInternalBank) {
-        await CustomerService.getCustomerByBankNumber(accountNumber as string);
-      } else {
-        throw new Error("External bank not supported");
+      const customer = await CustomerService.isValidPassword(id, oldPassword);
+      if (!customer) {
+        throw new Error("Invalid password");
       }
 
-      const result = await RecipientService.createRecipient({
-        accountNumber,
-        mnemonicName,
-        internalBankCustomer: {
-          connect: {
-            id,
-          },
-        },
-        customerRecipient: {
-          connectOrCreate: {
-            where: {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
-              customerId_recipientId: {
-                customerId: id,
-                recipientId: accountNumber,
-              },
-            },
-            create: {
-              customerId: id,
-            },
-          },
-        },
+      await CustomerService.updateCustomer(id, {
+        password: await hashPassword(newPassword),
       });
 
-      res.status(200).json({ data: result });
+      res.status(200).json({ data: "Password changed" });
       break;
     }
     case "GET": {

@@ -238,6 +238,32 @@ export class CustomerService {
       withBalance: true,
     });
   };
+
+  static updateCustomer = async (
+    id: string,
+    data: Prisma.CustomerUpdateInput
+  ) => {
+    return await prisma.customer.update({
+      where: { id },
+      data,
+      select: {
+        ...defaultCustomerSelector,
+      },
+    });
+  };
+
+  static isValidPassword = async (id: string, password: string) => {
+    const hashedPassword = (
+      await prisma.customer.findFirstOrThrow({
+        where: { id },
+        select: {
+          password: true,
+        },
+      })
+    ).password;
+
+    return await comparePassword(password, hashedPassword);
+  };
 }
 
 //@ts-ignore
