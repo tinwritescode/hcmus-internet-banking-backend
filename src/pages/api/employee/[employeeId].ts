@@ -3,7 +3,7 @@ import { catchAsync, validateSchema } from "../../../core/catchAsync";
 import { EmployeeService } from "../../../lib/database/employeeService";
 import { TokenService } from "../../../lib/database/tokenService";
 
-const postEmployeeSchema = z.object({
+const putEmployeeSchema = z.object({
   email: z.string().email(),
   employeeType: z.enum(["ADMIN", "EMPLOYEE"]),
   firstName: z.string().min(1),
@@ -22,7 +22,7 @@ export default catchAsync(async function handle(req, res) {
       });
 
       const { employeeType, firstName, lastName, password, email } =
-        validateSchema(postEmployeeSchema, req.body);
+        validateSchema(putEmployeeSchema, req.body);
 
       const result = await EmployeeService.updateEmployee({
         id: req.query.employeeId as string,
