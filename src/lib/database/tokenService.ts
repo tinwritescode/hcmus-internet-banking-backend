@@ -153,7 +153,7 @@ export class TokenService {
     const tokenData = await prisma.token.findFirst({
       where: {
         token,
-        type: !options.isAdminToken
+        type: !options?.isAdminToken
           ? TokenType.REFRESH
           : TokenType.ADMIN_REFRESH,
         isBlacklisted: false,

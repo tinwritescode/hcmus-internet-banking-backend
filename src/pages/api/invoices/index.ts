@@ -17,9 +17,14 @@ const createInvoiceSchema = z.object({
 });
 
 const getInvoicesSchema = z.object({
-  offset: z.preprocess(parseInt, z.number().min(0).default(0).optional()),
-  limit: z.preprocess(parseInt, z.number().min(1).default(10).optional()),
+  offset: z
+    .preprocess(parseInt, z.number().min(0).default(0).optional())
+    .optional(),
+  limit: z
+    .preprocess(parseInt, z.number().min(1).default(10).optional())
+    .optional(),
   isPaid: z.preprocess((value) => value === "true", z.boolean()).optional(),
+  type: z.enum(["created", "received"]).optional(),
 });
 
 export default catchAsync(async function handle(req, res) {
@@ -68,13 +73,16 @@ export default catchAsync(async function handle(req, res) {
         payload: { id },
       } = await TokenService.requireAuth(req);
 
-      const { offset, isPaid, limit } = getInvoicesSchema.parse(req.query);
+      const { offset, isPaid, limit, type } = getInvoicesSchema.parse(
+        req.query
+      );
 
-      const invoices = await InvoiceService.getInvoicesByReceiverId({
-        customerId: id,
+      const invoices = await InvoiceService.getInvoices({
+        creatorId: id,
         offset,
         limit,
         isPaid,
+        type,
       });
 
       res.status(200).json({ data: invoices });

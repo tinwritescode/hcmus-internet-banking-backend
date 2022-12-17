@@ -16,6 +16,7 @@ export class InvoiceService {
     },
     isPaid: true,
     paidAt: true,
+    message: true,
     updatedAt: true,
     createdAt: true,
   };
@@ -86,21 +87,45 @@ export class InvoiceService {
     }
   };
 
-  static getInvoicesByReceiverId = async ({
-    customerId,
+  static getInvoices = async ({
+    creatorId,
     offset = 0,
     limit = 10,
     isPaid,
+    type,
   }: {
-    customerId: string;
+    creatorId: string;
     isPaid?: boolean;
     offset?: number;
     limit?: number;
+    type?: "created" | "received";
   }) => {
+    const whereClause =
+      type === "created"
+        ? {
+            creatorId: creatorId,
+          }
+        : type === "received"
+        ? {
+            receiverId: creatorId,
+          }
+        : {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            OR: [
+              {
+                creatorId: creatorId,
+              },
+              {
+                receiverId: creatorId,
+              },
+            ],
+          };
+    console.table(whereClause);
+
     try {
       const invoices = await prisma.invoice.findMany({
         where: {
-          creatorId: customerId,
+          ...whereClause,
           isPaid: isPaid ?? undefined,
         },
         select: InvoiceService.defaultSelector,
@@ -110,7 +135,7 @@ export class InvoiceService {
 
       const total = await prisma.invoice.count({
         where: {
-          creatorId: customerId,
+          ...whereClause,
           isPaid: isPaid ?? undefined,
         },
       });
