@@ -198,6 +198,81 @@ export class CustomerService {
       transaction: session[2],
     };
   };
+
+  // Receive money from another bank
+  static dangerouslyReceiveMoney = async ({
+    amount,
+    from,
+    to,
+    message,
+    payer,
+  }: {
+    from: string;
+    to: string;
+    amount: bigint | number;
+    message: string;
+    payer: "receiver" | null;
+  }) => {
+    // check if the customer exists
+    await prisma.customer
+      .findUniqueOrThrow({
+        where: { id: to },
+      })
+      .catch(() => {
+        throw new ApiError("Invalid recipient", 400);
+      });
+
+    // if payer is receiver, deduct the base fee
+    const amountAfterFee =
+      BigInt(amount) -
+      (amount as bigint) *
+        BigInt(env.BASE_FEE) *
+        (payer === "receiver" ? 1n : 0n);
+
+    const session = await prisma.$transaction([
+      prisma.customer.update({
+        where: { id: to },
+        data: {
+          balance: {
+            increment: amountAfterFee,
+          },
+        },
+        select: {
+          ...defaultCustomerSelector,
+        },
+      }),
+      prisma.transaction.create({
+        data: {
+          amount,
+          message,
+          type: "EXTERNAL",
+          fromRecipient: {
+            connectOrCreate: {
+              where: { accountNumber: from },
+              create: {
+                accountNumber: from,
+              },
+            },
+          },
+          toCustomer: { connect: { id: to } },
+        },
+        select: {
+          id: true,
+          amount: true,
+          fromCustomerId: true,
+          toCustomerId: true,
+          recipientId: true,
+        },
+      }),
+    ]);
+
+    return {
+      from: from,
+      to: session[0],
+      transaction: session[1],
+    };
+  };
+
   static getCustomerIdByBankNumber = async (to: string) => {
     return (
       await prisma.customer.findUnique({
