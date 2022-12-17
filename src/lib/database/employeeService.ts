@@ -2,7 +2,7 @@ import { EmployeeLogType } from "./../../../node_modules/.prisma/client/index.d"
 import { comparePassword } from "./../bcrypt";
 import { hashPassword } from "../bcrypt";
 import { Prisma } from "@prisma/client";
-import prisma from "../prisma";
+import { prisma } from "../prisma";
 import { TokenService } from "./tokenService";
 import { ApiError } from "../../core/baseResponse";
 

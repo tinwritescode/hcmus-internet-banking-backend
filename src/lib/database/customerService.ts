@@ -2,7 +2,7 @@ import { comparePassword, hashPassword } from "../bcrypt";
 import { TokenService } from "./tokenService";
 import { Prisma, TokenType } from "@prisma/client";
 import { ApiError } from "../../core/baseResponse";
-import prisma from "../prisma";
+import { prisma } from "../prisma";
 import moment from "moment";
 import { env } from "../../core/env/server.mjs";
 

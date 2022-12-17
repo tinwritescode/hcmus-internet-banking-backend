@@ -3,7 +3,7 @@ import { TokenService } from "./tokenService";
 import { defaultCustomerSelector } from "./customerService";
 import { ApiError, PagingResponse } from "../../core/baseResponse";
 import { Prisma, TokenType } from "@prisma/client";
-import prisma from "../prisma";
+import { prisma } from "../prisma";
 import moment from "moment";
 import { env } from "../../core/env/server.mjs";
 

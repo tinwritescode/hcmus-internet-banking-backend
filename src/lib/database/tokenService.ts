@@ -1,8 +1,7 @@
-import { EmployeeType } from "./../../../node_modules/.prisma/client/index.d";
 import { ApiError } from "../../core/baseResponse";
-import { Prisma, TokenType } from "@prisma/client";
+import { EmployeeType, Prisma, TokenType } from "@prisma/client";
 import { randomUUID } from "crypto";
-import prisma from "../prisma";
+import { prisma } from "../prisma";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { NextApiRequest } from "next";
 

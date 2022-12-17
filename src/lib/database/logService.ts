@@ -1,7 +1,7 @@
 import { defaultCustomerSelector } from "./customerService";
 import { ApiError } from "../../core/baseResponse";
 import { Prisma } from "@prisma/client";
-import prisma from "../prisma";
+import { prisma } from "../prisma";
 
 export class LogService {
   static defaultSelector: Prisma.LogSelect = {
