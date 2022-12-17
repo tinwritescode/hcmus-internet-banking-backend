@@ -7,7 +7,6 @@ const getEmployeesSchema = z.object({
   // parse limit to number
   limit: z.preprocess(parseInt, z.number().min(1).max(100).default(10)),
   offset: z.preprocess(parseInt, z.number().min(0).default(0)),
-  test: z.string(),
 });
 const postEmployeeSchema = z.object({
   email: z.string().email(),
