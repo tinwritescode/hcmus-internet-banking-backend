@@ -1,3 +1,4 @@
+import { EmployeeLogType } from "./../../../node_modules/.prisma/client/index.d";
 import { comparePassword } from "./../bcrypt";
 import { hashPassword } from "../bcrypt";
 import { Prisma } from "@prisma/client";
@@ -34,14 +35,9 @@ export class EmployeeService {
       },
     });
 
-    await comparePassword(password, employeeWithPassword.password).catch(
-      (e) => {
-        console.log(e);
-        console.log(password, employeeWithPassword.password);
-
-        return Promise.reject(new ApiError("Invalid email or password", 401));
-      }
-    );
+    await comparePassword(password, employeeWithPassword.password).catch(() => {
+      return Promise.reject(new ApiError("Invalid email or password", 401));
+    });
 
     return await prisma.employee.findUnique({
       where: {
@@ -98,4 +94,72 @@ export class EmployeeService {
 
     return await EmployeeService.getEmployeeById(token.employeeId);
   };
+
+  static getAllEmployees(options: { offset?: number; limit?: number }): Promise<
+    Prisma.EmployeeGetPayload<{
+      select: typeof EmployeeService.defaultSelector;
+    }>[]
+  > {
+    return prisma.employee.findMany({
+      skip: options.offset,
+      take: options.limit,
+      select: EmployeeService.defaultSelector,
+    });
+  }
+
+  static writeLog = async ({
+    employeeId,
+    log,
+    type,
+  }: {
+    employeeId: string;
+    log: string;
+    type: EmployeeLogType;
+  }) => {
+    await prisma.employeeLog.create({
+      data: {
+        employeeId,
+        data: log,
+        deletedAt: null,
+        type,
+      },
+    });
+  };
+
+  static async updateEmployee({
+    email,
+    employeeType,
+    firstName,
+    lastName,
+    password,
+    id,
+  }: {
+    id: string;
+    email: string;
+    employeeType: "ADMIN" | "EMPLOYEE";
+    firstName: string;
+    lastName: string;
+    password: string;
+  }) {
+    return prisma.employee.update({
+      where: {
+        id,
+      },
+      data: {
+        email,
+        employeeType,
+        firstName,
+        lastName,
+        password: await hashPassword(password),
+      },
+    });
+  }
+
+  static async deleteEmployee(id: string) {
+    return prisma.employee.delete({
+      where: {
+        id,
+      },
+    });
+  }
 }

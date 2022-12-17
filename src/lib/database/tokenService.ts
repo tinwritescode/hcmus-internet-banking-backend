@@ -1,3 +1,4 @@
+import { EmployeeType } from "./../../../node_modules/.prisma/client/index.d";
 import { ApiError } from "../../core/baseResponse";
 import { Prisma, TokenType } from "@prisma/client";
 import { randomUUID } from "crypto";
@@ -122,6 +123,43 @@ export class TokenService {
 
     try {
       const decoded = await TokenService.validateAccessToken(token);
+
+      return { payload: decoded, token };
+    } catch (error) {
+      throw new ApiError("Unauthorized", 401);
+    }
+  };
+
+  static requireEmployeeAuth = async (
+    req: NextApiRequest,
+    options: { requireAdmin?: boolean; requireEmployee?: boolean } = {
+      requireAdmin: false,
+      requireEmployee: false,
+    }
+  ): Promise<{ payload: AccessTokenPayload; token: string }> => {
+    const token = req.headers.authorization?.split(" ")[1];
+
+    if (!token) {
+      throw new ApiError("Unauthorized", 401);
+    }
+
+    try {
+      const decoded = await TokenService.validateAccessToken(token);
+
+      if (options?.requireAdmin && options?.requireEmployee) {
+        // either
+        if (
+          decoded.role !== EmployeeType.ADMIN &&
+          decoded.role !== EmployeeType.EMPLOYEE
+        )
+          throw new ApiError("Unauthorized", 401);
+      } else {
+        if (options?.requireAdmin && decoded.role !== EmployeeType.ADMIN)
+          throw new ApiError("Unauthorized", 401);
+
+        if (options?.requireEmployee && decoded.role !== EmployeeType.EMPLOYEE)
+          throw new ApiError("Unauthorized", 401);
+      }
 
       return { payload: decoded, token };
     } catch (error) {

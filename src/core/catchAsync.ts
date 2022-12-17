@@ -16,7 +16,7 @@ const cors = Cors({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const validateSchema = <T>(schema: z.ZodSchema<T>, data: any) => {
   try {
-    schema.parse(data);
+    return schema.parse(data);
   } catch (error) {
     if (error instanceof ZodError) {
       throw new ApiError(error.message, 400, error);
