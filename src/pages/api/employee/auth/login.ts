@@ -14,7 +14,6 @@ export default catchAsync(async function handle(req, res) {
   switch (req.method) {
     case "POST":
       validateSchema(loginValidate, req.body);
-      await TokenService.requireNotAuth(req);
 
       const { email, password } = loginValidate.parse(req.body);
 
