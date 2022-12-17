@@ -55,25 +55,25 @@ export default catchAsync(async function dangerouslyHandle(req, res) {
   }
 });
 
-async function test() {
-  // decoded
-  const rawData = Buffer.from(
-    JSON.stringify({
-      // must be 10 number
-      accountNumber: "1234567890",
-    })
-  ).toString("base64");
+// async function test() {
+//   // decoded
+//   const rawData = Buffer.from(
+//     JSON.stringify({
+//       // must be 10 number
+//       accountNumber: "1234567890",
+//     })
+//   ).toString("base64");
 
-  // await rawDataSchema.parseAsync(rawData);
+//   // await rawDataSchema.parseAsync(rawData);
 
-  const signedData = await sign(rawData);
+//   const signedData = await sign(rawData);
 
-  const API_URL = "https://hcmus-internet-banking-backend.vercel.app";
+//   const API_URL = "https://hcmus-internet-banking-backend.vercel.app";
 
-  const res = await axios.post(`${API_URL}/api/external/query-bank-number`, {
-    data: rawData,
-    signature: signedData.signature,
-  });
+//   const res = await axios.post(`${API_URL}/api/external/query-bank-number`, {
+//     data: rawData,
+//     signature: signedData.signature,
+//   });
 
-  console.table(res.data);
-}
+//   console.table(res.data);
+// }
