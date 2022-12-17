@@ -4,8 +4,10 @@ import { EmployeeService } from "../../../lib/database/employeeService";
 import { TokenService } from "../../../lib/database/tokenService";
 
 const getEmployeesSchema = z.object({
-  limit: z.number().min(1).max(100).optional().default(10),
-  offset: z.number().min(0).optional().default(0),
+  // parse limit to number
+  limit: z.preprocess(parseInt, z.number().min(1).max(100).default(10)),
+  offset: z.preprocess(parseInt, z.number().min(0).default(0)),
+  test: z.string(),
 });
 const postEmployeeSchema = z.object({
   email: z.string().email(),
@@ -21,7 +23,10 @@ export default catchAsync(async function handle(req, res) {
       const { limit, offset } = validateSchema(getEmployeesSchema, req.query);
       await TokenService.requireEmployeeAuth(req, { requireAdmin: true });
 
-      const result = await EmployeeService.getAllEmployees({ limit, offset });
+      const result = await EmployeeService.getAllEmployees({
+        limit: limit as number,
+        offset: offset as number,
+      });
 
       res.status(200).json({ data: result });
       break;
