@@ -57,7 +57,7 @@ export default catchAsync(async function handle(req, res) {
         req.query.employeeId as string
       );
 
-      await EmployeeService.writeLog({
+      EmployeeService.writeLog({
         employeeId: id,
         log: JSON.stringify({
           message: `Deleted employee ${result.id}`,
