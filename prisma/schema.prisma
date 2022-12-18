@@ -177,7 +177,7 @@ model EmployeeLog {
   deletedAt DateTime? @map("deleted_at")
 
   employeeId String   @map("employee_id")
-  employee   Employee @relation(fields: [employeeId], references: [id])
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   type EmployeeLogType
   data String
@@ -217,10 +217,10 @@ model Token {
   isBlacklisted Boolean @default(false) @map("is_blacklisted")
 
   customerId String?   @map("customer_id")
-  customer   Customer? @relation(fields: [customerId], references: [id])
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
   employeeId String?   @map("employee_id")
-  employee   Employee? @relation(fields: [employeeId], references: [id])
+  employee   Employee? @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   @@map("tokens")
 }
