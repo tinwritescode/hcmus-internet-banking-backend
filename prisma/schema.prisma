@@ -171,10 +171,10 @@ enum EmployeeLogType {
 }
 
 model EmployeeLog {
-  id        BigInt   @id @default(autoincrement())
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  deletedAt DateTime @map("deleted_at")
+  id        BigInt    @id @default(autoincrement())
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
   employeeId String   @map("employee_id")
   employee   Employee @relation(fields: [employeeId], references: [id])

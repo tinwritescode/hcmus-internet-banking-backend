@@ -14,7 +14,6 @@ export class EmployeeService {
     employeeType: true,
     email: true,
     createdAt: true,
-    password: true,
     updatedAt: true,
   };
 
