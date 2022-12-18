@@ -139,7 +139,6 @@ export class EmployeeService {
       data: {
         employeeId,
         data: log,
-        deletedAt: null,
         type,
       },
     });
