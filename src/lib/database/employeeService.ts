@@ -4,7 +4,7 @@ import { hashPassword } from "../bcrypt";
 import { Prisma } from "@prisma/client";
 import { prisma } from "../prisma";
 import { TokenService } from "./tokenService";
-import { ApiError } from "../../core/baseResponse";
+import { ApiError, PagingResponse } from "../../core/baseResponse";
 
 export class EmployeeService {
   static defaultSelector: Prisma.EmployeeSelect = {
@@ -95,16 +95,32 @@ export class EmployeeService {
     return await EmployeeService.getEmployeeById(token.employeeId);
   };
 
-  static getAllEmployees(options: { offset?: number; limit?: number }): Promise<
-    Prisma.EmployeeGetPayload<{
-      select: typeof EmployeeService.defaultSelector;
-    }>[]
-  > {
-    return prisma.employee.findMany({
-      skip: options.offset,
-      take: options.limit,
+  static async getAllEmployees(options: {
+    offset?: number;
+    limit?: number;
+  }): Promise<PagingResponse> {
+    const { offset = 0, limit = 10 } = options;
+    // with count all
+    const employees = await prisma.employee.findMany({
+      skip: offset,
+      take: limit,
       select: EmployeeService.defaultSelector,
     });
+
+    const total = await prisma.employee.count();
+
+    const result: PagingResponse = {
+      data: employees,
+      metadata: {
+        total: total,
+        page: offset,
+        limit: limit,
+        hasNextPage: offset + limit < total,
+        hasPrevPage: offset > 0,
+      },
+    };
+
+    return result;
   }
 
   static writeLog = async ({
