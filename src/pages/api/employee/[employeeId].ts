@@ -43,6 +43,7 @@ export default catchAsync(async function handle(req, res) {
       });
 
       res.status(200).json({ data: result });
+      break;
     }
 
     case "DELETE": {
@@ -67,6 +68,7 @@ export default catchAsync(async function handle(req, res) {
       });
 
       res.status(200).json({ data: result });
+      break;
     }
 
     default:
