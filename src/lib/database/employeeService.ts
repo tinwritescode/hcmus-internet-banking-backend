@@ -1,3 +1,4 @@
+import { CustomerService } from "./customerService";
 import { EmployeeLogType } from "./../../../node_modules/.prisma/client/index.d";
 import { comparePassword } from "./../bcrypt";
 import { hashPassword } from "../bcrypt";
@@ -218,5 +219,41 @@ export class EmployeeService {
     };
 
     return result;
+  }
+
+  static async deposit({
+    employeeId,
+    amount,
+    message,
+    bankNumber,
+  }: {
+    employeeId: string;
+    amount: bigint;
+    message: string;
+    bankNumber: string;
+  }) {
+    const bankNumberToId = (
+      await CustomerService.getCustomerByBankNumber(bankNumber)
+    ).id;
+
+    return await prisma.$transaction([
+      prisma.customer.update({
+        where: {
+          id: bankNumberToId,
+        },
+        data: {
+          balance: {
+            increment: amount,
+          },
+        },
+      }),
+      prisma.employeeLog.create({
+        data: {
+          employeeId,
+          data: `Deposit ${amount} to ${bankNumber} with message: ${message}`,
+          type: "CUSTOMER_DEPOSIT",
+        },
+      }),
+    ]);
   }
 }
