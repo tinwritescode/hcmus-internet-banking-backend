@@ -101,13 +101,15 @@ export class EmployeeService {
   static async getAllEmployees(options: {
     offset?: number;
     limit?: number;
+    where?: Prisma.EmployeeWhereInput;
   }): Promise<PagingResponse> {
-    const { offset = 0, limit = 10 } = options;
+    const { offset = 0, limit = 10, where } = options;
     // with count all
     const employees = await prisma.employee.findMany({
       skip: offset,
       take: limit,
       select: EmployeeService.defaultSelector,
+      where: where,
     });
 
     const total = await prisma.employee.count();
@@ -153,11 +155,11 @@ export class EmployeeService {
     id,
   }: {
     id: string;
-    email: string;
-    employeeType: "ADMIN" | "EMPLOYEE";
-    firstName: string;
-    lastName: string;
-    password: string;
+    email?: string;
+    employeeType?: "ADMIN" | "EMPLOYEE";
+    firstName?: string;
+    lastName?: string;
+    password?: string;
   }) {
     return prisma.employee.update({
       where: {
@@ -168,7 +170,7 @@ export class EmployeeService {
         employeeType,
         firstName,
         lastName,
-        password: await hashPassword(password),
+        password: password ? await hashPassword(password) : undefined,
       },
     });
   }
@@ -179,5 +181,42 @@ export class EmployeeService {
         id,
       },
     });
+  }
+
+  static async getEmployeeLogs({
+    limit,
+    offset,
+    where,
+  }: {
+    offset: number;
+    limit: number;
+    where?: Prisma.EmployeeLogWhereInput;
+  }): Promise<PagingResponse> {
+    const logs = await prisma.employeeLog.findMany({
+      where: {
+        ...where,
+      },
+      select: {
+        id: true,
+        data: true,
+        type: true,
+        createdAt: true,
+      },
+      skip: offset,
+      take: limit,
+    });
+
+    const result: PagingResponse = {
+      data: logs,
+      metadata: {
+        total: logs.length,
+        page: offset / limit + 1,
+        limit: limit,
+        hasNextPage: offset + limit < logs.length,
+        hasPrevPage: offset > 0,
+      },
+    };
+
+    return result;
   }
 }
