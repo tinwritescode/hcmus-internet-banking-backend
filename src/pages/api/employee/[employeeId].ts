@@ -4,11 +4,11 @@ import { EmployeeService } from "../../../lib/database/employeeService";
 import { TokenService } from "../../../lib/database/tokenService";
 
 const putEmployeeSchema = z.object({
-  email: z.string().email(),
-  employeeType: z.enum(["ADMIN", "EMPLOYEE"]),
-  firstName: z.string().min(1),
-  lastName: z.string().min(1),
-  password: z.string().min(1),
+  email: z.string().email().optional(),
+  employeeType: z.enum(["ADMIN", "EMPLOYEE"]).optional(),
+  firstName: z.string().min(1).optional(),
+  lastName: z.string().min(1).optional(),
+  password: z.string().min(1).optional(),
 });
 
 export default catchAsync(async function handle(req, res) {
