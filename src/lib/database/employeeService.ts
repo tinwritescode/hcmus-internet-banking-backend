@@ -12,6 +12,10 @@ export class EmployeeService {
     firstName: true,
     lastName: true,
     employeeType: true,
+    email: true,
+    createdAt: true,
+    password: true,
+    updatedAt: true,
   };
 
   static createEmployee = async (employee: Prisma.EmployeeCreateInput) => {
@@ -113,7 +117,7 @@ export class EmployeeService {
       data: employees,
       metadata: {
         total: total,
-        page: offset,
+        page: offset / limit + 1,
         limit: limit,
         hasNextPage: offset + limit < total,
         hasPrevPage: offset > 0,
