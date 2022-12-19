@@ -20,12 +20,11 @@ export default catchAsync(async function handle(req, res) {
 
   switch (req.method) {
     case "DELETE": {
-      validateSchema(deleteInvoiceSchema, req.body);
       const {
         payload: { id },
       } = await TokenService.requireAuth(req);
 
-      const { reason } = deleteInvoiceSchema.parse(req.body);
+      const { reason } = validateSchema(deleteInvoiceSchema, req.body);
       const canDelete = await InvoiceService.canDeleteInvoice(invoiceId, id);
 
       if (!canDelete) {
