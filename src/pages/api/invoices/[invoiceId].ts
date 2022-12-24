@@ -1,3 +1,4 @@
+import { sendEmail } from "./../../../lib/nodemailer";
 import { LogService } from "./../../../lib/database/logService";
 import { InvoiceService } from "../../../lib/database/invoiceService";
 import { validateSchema } from "../../../core/catchAsync";
@@ -33,10 +34,24 @@ export default catchAsync(async function handle(req, res) {
 
       const result = await InvoiceService.deleteInvoice(invoiceId);
 
-      LogService.createLog({
-        type: "DELETE_INVOICE",
-        data: `User ${id} deleted invoice ${invoiceId} with reason ${reason}`,
-      });
+      await Promise.all([
+        LogService.createLog({
+          type: "DELETE_INVOICE",
+          data: `User ${id} deleted invoice ${invoiceId} with reason ${reason}`,
+        }),
+        sendEmail({
+          to: result.creator.email,
+          subject: "Invoice deleted",
+          html: `Your invoice ${invoiceId} has been deleted by the payer with reason: ${reason}`,
+        }),
+        sendEmail({
+          to: result.customer.email,
+          subject: "Invoice deleted",
+          html: `Your invoice ${invoiceId} has been deleted by ${result.creator.firstName} ${result.creator.lastName}, the creator of the invoice, with reason: ${reason}`,
+        }),
+      ]);
+
+      delete result.customer;
 
       res.status(200).json({ data: result });
       break;

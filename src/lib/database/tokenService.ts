@@ -233,6 +233,25 @@ export class TokenService {
     return true;
   };
 
+  static validatePayInvoiceToken = async (token: string): Promise<boolean> => {
+    const tokenData = await prisma.token.findFirst({
+      where: { token, type: TokenType.PAY_INVOICE, isBlacklisted: false },
+      select: {
+        expiredAt: true,
+      },
+    });
+
+    if (!tokenData) {
+      return false;
+    }
+
+    if (tokenData.expiredAt < new Date()) {
+      return false;
+    }
+
+    return true;
+  };
+
   static extendToken = async (token: string, minute: number): Promise<void> => {
     await prisma.token.updateMany({
       where: { token },

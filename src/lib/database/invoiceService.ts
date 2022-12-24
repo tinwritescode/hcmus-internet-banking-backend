@@ -48,6 +48,12 @@ export class InvoiceService {
             email: true,
           },
         },
+        customer: {
+          select: {
+            ...defaultCustomerSelector,
+            email: true,
+          },
+        },
       },
     });
 

@@ -203,6 +203,7 @@ enum TokenType {
   REFRESH
   TRANSFER
   ADMIN_REFRESH
+  PAY_INVOICE
 }
 
 model Token {
