@@ -34,7 +34,7 @@ export const catchAsync = (
     try {
       await runMiddleware(req, res, cors);
 
-      await fn(req, res).catch((err) => {
+      fn(req, res).catch((err) => {
         if (err instanceof ApiError) {
           return res.status(err.status).json({
             error: {
