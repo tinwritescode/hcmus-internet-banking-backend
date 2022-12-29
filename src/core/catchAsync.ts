@@ -33,13 +33,13 @@ export const catchAsync = (
     const isDev = process.env.NODE_ENV === "development";
 
     try {
-      // await runMiddleware(req, res, cors);
-      await NextCors(req, res, {
-        // Options
-        methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
-        origin: "*",
-        optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-      });
+      await runMiddleware(req, res, cors);
+      // await NextCors(req, res, {
+      //   // Options
+      //   methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
+      //   origin: "*",
+      //   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+      // });
 
       fn(req, res).catch((err) => {
         if (err instanceof ApiError) {
