@@ -5,7 +5,7 @@ import { TokenService } from "../../../../lib/database/tokenService";
 
 // deposit
 const postEmployeeSchema = z.object({
-  bankNumber: z.string().min(9).max(9),
+  bankNumber: z.string().min(10).max(10),
   amount: z.preprocess(Number, z.number().min(1)),
   message: z.string().optional(),
 });
