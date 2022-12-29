@@ -25,7 +25,7 @@ export default catchAsync(async function handle(req, res) {
       await sendEmail({
         to: email,
         subject: "Pay Invoice OTP",
-        html: `Your OTP is: ${token}`,
+        html: `Your OTP is: ${token.token}`,
       });
 
       res.status(200).json({ data: { message: "OTP sent to your email" } });
