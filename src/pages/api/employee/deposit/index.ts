@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { catchAsync, validateSchema } from "../../../core/catchAsync";
-import { EmployeeService } from "../../../lib/database/employeeService";
-import { TokenService } from "../../../lib/database/tokenService";
+import { catchAsync, validateSchema } from "../../../../core/catchAsync";
+import { EmployeeService } from "../../../../lib/database/employeeService";
+import { TokenService } from "../../../../lib/database/tokenService";
 
 // deposit
 const postEmployeeSchema = z.object({
