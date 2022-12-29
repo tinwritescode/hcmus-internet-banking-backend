@@ -2,7 +2,6 @@ import { Prisma } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import { z, ZodError } from "zod";
 import { ApiError, BaseResponse } from "./baseResponse";
-import NextCors from "nextjs-cors";
 
 import Cors from "cors";
 import { runMiddleware } from "./runMiddleware";
@@ -34,12 +33,6 @@ export const catchAsync = (
 
     try {
       await runMiddleware(req, res, cors);
-      // await NextCors(req, res, {
-      //   // Options
-      //   methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
-      //   origin: "*",
-      //   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-      // });
 
       fn(req, res).catch((err) => {
         if (err instanceof ApiError) {

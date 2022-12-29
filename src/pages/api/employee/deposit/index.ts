@@ -26,14 +26,15 @@ export default catchAsync(async function handle(req, res) {
         req.body
       );
 
-      const result = await EmployeeService.deposit({
+      const [, log] = await EmployeeService.deposit({
         amount: amount as bigint,
         bankNumber,
         employeeId: id,
         message,
       });
 
-      res.status(200).json({ data: result });
+      res.status(200).json({ data: log });
+      break;
     }
 
     default:
