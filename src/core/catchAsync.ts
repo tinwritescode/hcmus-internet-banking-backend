@@ -66,6 +66,16 @@ export const catchAsync = (
           } as any);
         }
 
+        if (err instanceof ZodError) {
+          return res.status(400).json({
+            error: {
+              message: err.message,
+              stackTrace: isDev ? stackTrace : undefined,
+              ...err,
+            },
+          } as any);
+        }
+
         throw err;
       });
     } catch (err) {

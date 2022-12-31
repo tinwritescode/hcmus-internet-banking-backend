@@ -34,9 +34,9 @@ export default catchAsync(async function dangerouslyHandle(req, res) {
       }
 
       const decoded = Buffer.from(data, "base64").toString("utf8");
-      console.log(decoded);
 
       validateSchema(rawDataSchema, JSON.parse(decoded));
+
       const { accountNumber } = rawDataSchema.parse(JSON.parse(decoded));
 
       const result = await CustomerService.getCustomerByBankNumber(
