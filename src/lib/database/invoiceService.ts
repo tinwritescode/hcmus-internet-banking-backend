@@ -1,8 +1,8 @@
-import { sendEmail } from "./../nodemailer";
-import { CustomerService, defaultCustomerSelector } from "./customerService";
-import { ApiError, PagingResponse } from "../../core/baseResponse";
-import { Prisma } from "@prisma/client";
-import { prisma } from "../prisma";
+import { sendEmail } from './../nodemailer';
+import { CustomerService, defaultCustomerSelector } from './customerService';
+import { ApiError, PagingResponse } from '../../core/baseResponse';
+import { Prisma } from '@prisma/client';
+import { prisma } from '../prisma';
 
 export class InvoiceService {
   static defaultSelector: Prisma.InvoiceSelect = {
@@ -28,11 +28,11 @@ export class InvoiceService {
       });
     } catch (error) {
       // P2002
-      if (error.code === "P2002") {
-        throw new ApiError("Invoice already exists", 400);
+      if (error.code === 'P2002') {
+        throw new ApiError('Invoice already exists', 400);
       }
 
-      throw new ApiError("Something went wrong", 500);
+      throw new ApiError('Something went wrong', 500);
     }
   };
 
@@ -58,16 +58,16 @@ export class InvoiceService {
     });
 
     if (result === null) {
-      throw new ApiError("Invoice not found", 404);
+      throw new ApiError('Invoice not found', 404);
     }
 
     sendEmail({
       to: result.receiverId,
-      subject: "Invoice deleted",
+      subject: 'Invoice deleted',
       html: `Invoice ${result.id} has been deleted\nCreator: ${
         result.creator.firstName
       } ${result.creator.lastName}\nAmount: ${result.amount}\n${
-        result.isPaid ? "Paid at: " + result.paidAt : ""
+        result.isPaid ? 'Paid at: ' + result.paidAt : ''
       }}`,
     });
 
@@ -89,6 +89,7 @@ export class InvoiceService {
 
       return invoice;
     } catch (error) {
+      console.log(error);
       return null;
     }
   };
@@ -104,14 +105,14 @@ export class InvoiceService {
     isPaid?: boolean;
     offset?: number;
     limit?: number;
-    type?: "created" | "received";
+    type?: 'created' | 'received';
   }) => {
     const whereClause =
-      type === "created"
+      type === 'created'
         ? {
             creatorId: creatorId,
           }
-        : type === "received"
+        : type === 'received'
         ? {
             receiverId: creatorId,
           }
@@ -215,18 +216,18 @@ export class InvoiceService {
         id,
       },
     });
-    if (invoice === null) throw new ApiError("Invoice not found", 404);
-    if (invoice.isPaid) throw new ApiError("Invoice already paid", 400);
+    if (invoice === null) throw new ApiError('Invoice not found', 404);
+    if (invoice.isPaid) throw new ApiError('Invoice already paid', 400);
     if (invoice.receiverId !== payerId)
-      throw new ApiError("You are not the receiver of this invoice", 400);
+      throw new ApiError('You are not the receiver of this invoice', 400);
 
     const receiver = await CustomerService.getCustomerById(
       invoice.receiverId,
       {}
     );
-    if (receiver === null) throw new ApiError("Receiver not found", 404);
+    if (receiver === null) throw new ApiError('Receiver not found', 404);
     if (receiver.balance < invoice.amount)
-      throw new ApiError("Not enough balance", 400);
+      throw new ApiError('Not enough balance', 400);
 
     const result = await prisma.$transaction([
       prisma.invoice.update({
