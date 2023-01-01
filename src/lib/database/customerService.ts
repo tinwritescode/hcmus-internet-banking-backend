@@ -216,7 +216,7 @@ export class CustomerService {
     // check if the customer exists
     await prisma.customer
       .findUniqueOrThrow({
-        where: { id: to },
+        where: { accountNumber: to },
       })
       .catch(() => {
         throw new ApiError("Invalid recipient", 400);
