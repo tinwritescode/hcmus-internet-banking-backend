@@ -128,7 +128,7 @@ export class TransactionService {
         data: transactions,
         metadata: {
           total: total,
-          page: offset,
+          page: Math.floor(offset / limit) + 1,
           limit: limit,
           hasNextPage: offset + limit < total,
           hasPrevPage: offset > 0,
