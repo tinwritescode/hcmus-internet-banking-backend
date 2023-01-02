@@ -1,5 +1,3 @@
-import { type } from "os";
-import { type } from "os";
 import { TransactionService } from "../../../lib/database/transactionService";
 import { catchAsync } from "../../../core/catchAsync";
 import { TokenService } from "../../../lib/database/tokenService";
