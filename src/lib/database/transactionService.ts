@@ -12,6 +12,7 @@ export class TransactionService {
     amount: true,
     createdAt: true,
     fromCustomer: { select: defaultCustomerSelector },
+    toCustomer: { select: defaultCustomerSelector },
     // recipient: { select: RecipientService.defaultSelector },
     message: true,
     id: true,
@@ -37,31 +38,97 @@ export class TransactionService {
 
   static getTransactionsByCustomerId = async (
     customerId: string,
+    type: string,
     offset = 0,
     limit = 10
   ) => {
     try {
-      const [transactions, total] = await Promise.all([
-        prisma.transaction.findMany({
-          where: {
-            fromCustomerId: customerId,
-          },
-          select: TransactionService.defaultSelector,
-          skip: offset,
-          take: limit,
-        }),
-        prisma.transaction.count({
-          where: {
-            fromCustomerId: customerId,
-          },
-        }),
-      ]);
+      let dataResult = [];
+      if (type === "sent") {
+        dataResult = await Promise.all([
+          prisma.transaction.findMany({
+            where: {
+              fromCustomerId: customerId,
+            },
+            select: TransactionService.defaultSelector,
+            skip: offset,
+            take: limit,
+            orderBy: {
+              createdAt: "desc",
+            },
+          }),
+          prisma.transaction.count({
+            where: {
+              fromCustomerId: customerId,
+            },
+          }),
+        ]);
+      } else if (type === "received") {
+        dataResult = await Promise.all([
+          prisma.transaction.findMany({
+            where: {
+              toCustomerId: customerId,
+            },
+            select: TransactionService.defaultSelector,
+            skip: offset,
+            take: limit,
+            orderBy: {
+              createdAt: "desc",
+            },
+          }),
+          prisma.transaction.count({
+            where: {
+              toCustomerId: customerId,
+            },
+          }),
+        ]);
+      } else {
+        dataResult = await Promise.all([
+          prisma.transaction.findMany({
+            // where: {
+            //   fromCustomerId: customerId,
+            // },
+            where: {
+              // eslint-disable-next-line @typescript-eslint/naming-convention
+              OR: [
+                {
+                  fromCustomerId: customerId,
+                },
+                {
+                  toCustomerId: customerId,
+                },
+              ],
+            },
+            select: TransactionService.defaultSelector,
+            skip: offset,
+            take: limit,
+            orderBy: {
+              createdAt: "desc",
+            },
+          }),
+          prisma.transaction.count({
+            where: {
+              // eslint-disable-next-line @typescript-eslint/naming-convention
+              OR: [
+                {
+                  fromCustomerId: customerId,
+                },
+                {
+                  toCustomerId: customerId,
+                },
+              ],
+            },
+          }),
+        ]);
+      }
+
+      const [transactions, total] = dataResult;
 
       const result: PagingResponse = {
         data: transactions,
         metadata: {
           total: total,
-          page: offset,
+          page: Math.floor(offset / limit) + 1,
           limit: limit,
           hasNextPage: offset + limit < total,
           hasPrevPage: offset > 0,

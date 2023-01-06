@@ -9,9 +9,10 @@ export default catchAsync(async function handle(req, res) {
         payload: { id },
       } = await TokenService.requireAuth(req);
 
-      const { offset, limit } = req.query;
+      const { offset, limit, type } = req.query;
       const recipients = await TransactionService.getTransactionsByCustomerId(
         id,
+        type as string,
         parseInt((offset as string) || "0"),
         parseInt((limit as string) || "10")
       );
