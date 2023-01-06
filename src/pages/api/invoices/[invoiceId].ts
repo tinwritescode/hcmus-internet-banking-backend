@@ -1,11 +1,12 @@
-import { sendEmail } from "./../../../lib/nodemailer";
-import { LogService } from "./../../../lib/database/logService";
-import { InvoiceService } from "../../../lib/database/invoiceService";
-import { validateSchema } from "../../../core/catchAsync";
-import { z } from "zod";
-import { catchAsync } from "../../../core/catchAsync";
-import { TokenService } from "../../../lib/database/tokenService";
-import { ApiError } from "../../../core/baseResponse";
+// import { sendEmail } from './../../../lib/nodemailer';
+import { LogService } from './../../../lib/database/logService';
+import { InvoiceService } from '../../../lib/database/invoiceService';
+import { validateSchema } from '../../../core/catchAsync';
+import { z } from 'zod';
+import { catchAsync } from '../../../core/catchAsync';
+import { TokenService } from '../../../lib/database/tokenService';
+import { ApiError } from '../../../core/baseResponse';
+import { NotificationService } from '../../../lib/notifyService';
 
 const updateInvoiceSchema = z.object({
   amount: z.preprocess(BigInt, z.bigint()),
@@ -20,7 +21,7 @@ export default catchAsync(async function handle(req, res) {
   const invoiceId = BigInt(req.query.invoiceId as string);
 
   switch (req.method) {
-    case "DELETE": {
+    case 'DELETE': {
       const {
         payload: { id },
       } = await TokenService.requireAuth(req);
@@ -36,19 +37,26 @@ export default catchAsync(async function handle(req, res) {
 
       await Promise.all([
         LogService.createLog({
-          type: "DELETE_INVOICE",
+          type: 'DELETE_INVOICE',
           data: `User ${id} deleted invoice ${invoiceId} with reason ${reason}`,
         }),
-        sendEmail({
-          to: result.creator.email,
-          subject: "Invoice deleted",
-          html: `Your invoice ${invoiceId} has been deleted by the payer with reason: ${reason}`,
-        }),
-        sendEmail({
-          to: result.customer.email,
-          subject: "Invoice deleted",
-          html: `Your invoice ${invoiceId} has been deleted by ${result.creator.firstName} ${result.creator.lastName}, the creator of the invoice, with reason: ${reason}`,
-        }),
+        NotificationService.notificationCancelInvoice(
+          invoiceId,
+          reason,
+          result.creator.id,
+          result.customer.id
+        ),
+
+        // sendEmail({
+        //   to: result.creator.email,
+        //   subject: "Invoice deleted",
+        //   html: `Your invoice ${invoiceId} has been deleted by the payer with reason: ${reason}`,
+        // }),
+        // sendEmail({
+        //   to: result.customer.email,
+        //   subject: "Invoice deleted",
+        //   html: `Your invoice ${invoiceId} has been deleted by ${result.creator.firstName} ${result.creator.lastName}, the creator of the invoice, with reason: ${reason}`,
+        // }),
       ]);
 
       delete result.customer;
@@ -56,7 +64,7 @@ export default catchAsync(async function handle(req, res) {
       res.status(200).json({ data: result });
       break;
     }
-    case "GET": {
+    case 'GET': {
       const {
         payload: { id },
       } = await TokenService.requireAuth(req);
@@ -72,7 +80,7 @@ export default catchAsync(async function handle(req, res) {
       res.status(200).json({ data: invoices });
       break;
     }
-    case "PUT": {
+    case 'PUT': {
       const {
         payload: { id },
       } = await TokenService.requireAuth(req);
@@ -86,7 +94,7 @@ export default catchAsync(async function handle(req, res) {
 
       const destInvoice = await InvoiceService.getInvoiceById(invoiceId);
       if (!destInvoice) {
-        throw new ApiError("Invoice not found", 404);
+        throw new ApiError('Invoice not found', 404);
       }
       if (destInvoice.isPaid) {
         throw new ApiError("You can't update a paid invoice", 403);
@@ -94,7 +102,7 @@ export default catchAsync(async function handle(req, res) {
 
       const { amount, message } = req.body;
       if (amount <= 0) {
-        throw new ApiError("Amount must be greater than 0", 400);
+        throw new ApiError('Amount must be greater than 0', 400);
       }
 
       const invoice = await InvoiceService.updateInvoice(invoiceId, {
@@ -108,7 +116,7 @@ export default catchAsync(async function handle(req, res) {
     }
     default: {
       res.status(405).json({
-        error: { message: "Method not allowed" },
+        error: { message: 'Method not allowed' },
       });
     }
   }

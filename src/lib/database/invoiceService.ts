@@ -3,6 +3,7 @@ import { CustomerService, defaultCustomerSelector } from './customerService';
 import { ApiError, PagingResponse } from '../../core/baseResponse';
 import { Prisma } from '@prisma/client';
 import { prisma } from '../prisma';
+import { NotificationService } from '../notifyService';
 
 export class InvoiceService {
   static defaultSelector: Prisma.InvoiceSelect = {
@@ -61,15 +62,15 @@ export class InvoiceService {
       throw new ApiError('Invoice not found', 404);
     }
 
-    sendEmail({
-      to: result.receiverId,
-      subject: 'Invoice deleted',
-      html: `Invoice ${result.id} has been deleted\nCreator: ${
-        result.creator.firstName
-      } ${result.creator.lastName}\nAmount: ${result.amount}\n${
-        result.isPaid ? 'Paid at: ' + result.paidAt : ''
-      }}`,
-    });
+    // sendEmail({
+    //   to: result.receiverId,
+    //   subject: 'Invoice deleted',
+    //   html: `Invoice ${result.id} has been deleted\nCreator: ${
+    //     result.creator.firstName
+    //   } ${result.creator.lastName}\nAmount: ${result.amount}\n${
+    //     result.isPaid ? 'Paid at: ' + result.paidAt : ''
+    //   }}`,
+    // });
 
     return result;
   };
