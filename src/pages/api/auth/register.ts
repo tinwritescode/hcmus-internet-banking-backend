@@ -4,6 +4,8 @@ import { catchAsync, validateSchema } from "../../../core/catchAsync";
 import { hashPassword } from "../../../lib/bcrypt";
 import { getRandomBankNumber } from "../../../lib/rand";
 import { CustomerService } from "../../../lib/database/customerService";
+import { TokenService } from "../../../lib/database/tokenService";
+import { prisma } from "../../../lib/prisma";
 
 const registerValidate = z.object({
   email: z.string().email(),
@@ -15,6 +17,12 @@ const registerValidate = z.object({
 export default catchAsync(async function handle(req, res) {
   switch (req.method) {
     case "POST":
+      const {
+        payload: { id },
+      } = await TokenService.requireEmployeeAuth(req, {
+        requireEmployee: true,
+        requireAdmin: true,
+      });
       validateSchema(registerValidate, req.body);
 
       const newCustomer: Prisma.CustomerCreateInput = {
@@ -26,7 +34,14 @@ export default catchAsync(async function handle(req, res) {
       };
       const result = await CustomerService.createCustomer(newCustomer);
 
-      res.status(200).json({ data: result });
+      prisma.employeeLog.create({
+        data: {
+          employeeId: id,
+          data: `Created customer ${result.id}, ${result.firstName} ${result.lastName}, ${result.email}`,
+          type: "CUSTOMER_CREATE",
+        },
+      }),
+        res.status(200).json({ data: result });
       break;
     default:
       res.status(405).json({
