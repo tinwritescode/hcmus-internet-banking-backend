@@ -42,12 +42,44 @@ export default catchAsync(async function handle(req, res) {
         sendEmail({
           to: result.creator.email,
           subject: "Invoice deleted",
-          html: `Your invoice ${invoiceId} has been deleted by the payer with reason: ${reason}`,
+          html: `
+            <div style="font-family: Arial, sans-serif; padding: 20px;">
+              <h1 style="color: #333;">Invoice Deleted</h1>
+              <hr style="border: 1px solid #ddd; margin: 20px 0;">
+              <div style="font-size: 18px; margin-bottom: 20px;">
+                <p><strong>Invoice ID:</strong> ${invoiceId}</p>
+                <p><strong>Reason:</strong> ${reason}</p>
+              </div>
+              <hr style="border: 1px solid #ddd; margin: 20px 0;">
+              <div style="font-size: 14px; color: #666; margin-bottom: 20px;">
+                <p>This email was sent by the system.</p>
+                <p>This is an automated message and does not require a response.</p>
+                <p>If you have any questions or concerns, please contact our support team.</p>
+              </div>
+            </div>
+          `,
         }),
+
         sendEmail({
           to: result.customer.email,
           subject: "Invoice deleted",
-          html: `Your invoice ${invoiceId} has been deleted by ${result.creator.firstName} ${result.creator.lastName}, the creator of the invoice, with reason: ${reason}`,
+          html: `
+            <div style="font-family: Arial, sans-serif; padding: 20px;">
+              <h1 style="color: #333;">Invoice Deleted</h1>
+              <hr style="border: 1px solid #ddd; margin: 20px 0;">
+              <div style="font-size: 18px; margin-bottom: 20px;">
+                <p><strong>Invoice ID:</strong> ${invoiceId}</p>
+                <p><strong>Deleted by:</strong> ${result.creator.firstName} ${result.creator.lastName}</p>
+                <p><strong>Reason:</strong> ${reason}</p>
+              </div>
+              <hr style="border: 1px solid #ddd; margin: 20px 0;">
+              <div style="font-size: 14px; color: #666; margin-bottom: 20px;">
+                <p>This email was sent by the system.</p>
+                <p>This is an automated message and does not require a response.</p>
+                <p>If you have any questions or concerns, please contact our support team.</p>
+              </div>
+            </div>
+          `,
         }),
       ]);
 

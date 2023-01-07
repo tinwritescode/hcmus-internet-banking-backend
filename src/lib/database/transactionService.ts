@@ -120,7 +120,22 @@ export class TransactionService {
     sendEmail({
       to: userEmail,
       subject: "Transfer token",
-      html: `Your transfer token is ${result.token}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #fafafa;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #fff; border: 1px solid #ddd; box-shadow: 0 2px 3px rgba(0,0,0,0.1);">
+            <div style="padding: 20px; font-size: 18px;">
+              <h1 style="margin: 0; font-weight: normal; font-size: 18px; color: #333;">Transfer Token</h1>
+              <p style="margin: 20px 0; font-size: 14px; color: #666;">Use this token to complete your transfer:</p>
+              <div style="background-color: #f1f1f1; padding: 10px; font-size: 24px; text-align: center;">${result.token}</div>
+            </div>
+            <div style="padding: 20px; font-size: 14px; color: #666;">
+              <p>This email was sent by the system.</p>
+              <p>This is an automated message and does not require a response.</p>
+              <p>If you have any questions or concerns, please contact our support team.</p>
+            </div>
+          </div>
+        </div>
+      `,
     });
 
     return result;

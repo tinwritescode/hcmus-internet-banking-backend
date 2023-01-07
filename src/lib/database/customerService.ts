@@ -364,6 +364,12 @@ export class CustomerService {
       },
     });
   };
+
+  static closeAccount = async (id: string) => {
+    return await prisma.customer.delete({
+      where: { id },
+    });
+  };
 }
 
 //@ts-ignore

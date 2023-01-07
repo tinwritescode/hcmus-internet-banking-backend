@@ -11,7 +11,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:push": "npx prisma db push"
+    "db:push": "npx prisma db push",
+    "postbuild": "jscpd --pattern \"src/**/*.ts\" -r html"
   },
   "dependencies": {
     "@prisma/client": "^4.7.1",
