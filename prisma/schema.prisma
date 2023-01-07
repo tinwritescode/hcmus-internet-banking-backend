@@ -84,9 +84,20 @@ model Transaction {
   toRecipient     Recipient? @relation("to_recipient", fields: [toRecipientId], references: [id])
   Recipient       Recipient? @relation(fields: [recipientId], references: [id])
   recipientId     String?
+  extBankId       String?    @map("ext_bank_id")
+  extBank         Bank?      @relation(fields: [extBankId], references: [id])
 
   @@index([fromCustomerId])
   @@map("transactions")
+}
+
+model Bank {
+  id           String        @id @default(uuid())
+  name         String
+  address      String
+  transactions Transaction[]
+
+  @@map("banks")
 }
 
 model Invoice {

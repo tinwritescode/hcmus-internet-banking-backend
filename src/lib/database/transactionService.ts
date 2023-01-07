@@ -233,4 +233,21 @@ export class TransactionService {
 
     return transactionToken;
   };
+
+  static async getTransaction({
+    where,
+    limit,
+    offset,
+  }: {
+    where: Prisma.TransactionWhereInput;
+    limit: number;
+    offset: number;
+  }) {
+    return prisma.transaction.findMany({
+      where,
+      select: TransactionService.defaultSelector,
+      skip: offset,
+      take: limit,
+    });
+  }
 }
