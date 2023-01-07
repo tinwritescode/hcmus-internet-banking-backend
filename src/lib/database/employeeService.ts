@@ -173,6 +173,7 @@ export class EmployeeService {
         lastName,
         password: password ? await hashPassword(password) : undefined,
       },
+      select: EmployeeService.defaultSelector,
     });
   }
 
@@ -181,6 +182,7 @@ export class EmployeeService {
       where: {
         id,
       },
+      select: EmployeeService.defaultSelector,
     });
   }
 
