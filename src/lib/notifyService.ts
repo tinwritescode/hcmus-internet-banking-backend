@@ -1,12 +1,12 @@
 import clientNotifyService from './clientNotify';
 import { InvoiceService } from './database/invoiceService';
 
-interface PayInvoiceResponse {
+interface InvoiceResponse {
   success: boolean;
   message?: string;
 }
 
-const payInvoiceNotification = async (invoiceId: number | bigint) => {
+const invoiceNotification = async (invoiceId: number | bigint) => {
   const invoice = await InvoiceService.getInvoiceById(invoiceId);
   const creator = invoice?.creator;
   const customer = invoice?.customer;
@@ -27,7 +27,7 @@ export class NotificationService {
     invoiceId: number | bigint
   ): Promise<boolean> => {
     try {
-      const data = await payInvoiceNotification(invoiceId);
+      const data = await invoiceNotification(invoiceId);
 
       const payload = {
         invoiceId,
@@ -36,7 +36,7 @@ export class NotificationService {
         amount: data.amount,
       };
 
-      const res = await clientNotifyService.post<PayInvoiceResponse>(
+      const res = await clientNotifyService.post<InvoiceResponse>(
         '/api/notify/pay-invoice',
         {
           payload,
@@ -49,35 +49,60 @@ export class NotificationService {
     }
   };
 
-  //   static notifyCreateInvoice = async (token: string): Promise<boolean> => {
+  static notificationCreateInvoice = async (
+    invoiceId: number | bigint
+  ): Promise<boolean> => {
+    try {
+      const data = await invoiceNotification(invoiceId);
 
-  //     const response = await fetch(process.env.RECAPTCHA_VERIFY_URL || '', {
-  //       method: 'POST',
+      const payload = {
+        invoiceId,
+        from: data.creator,
+        to: data.customer,
+        amount: data.amount,
+      };
 
-  //       headers: {
-  //         // eslint-disable-next-line @typescript-eslint/naming-convention
-  //         'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
-  //       },
+      const res = await clientNotifyService.post<InvoiceResponse>(
+        '/api/notify/create-invoice',
+        {
+          payload,
+        }
+      );
 
-  //       body: JSON.stringify({
-  //         secret,
-  //         response: token,
-  //       }),
-  //     });
+      return res.data.success;
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-  //     const data = await response.json();
-  //     const isVerified = data.success;
+  static notificationCancelInvoice = async (
+    invoiceId: number | bigint,
+    reason: string,
+    from: string,
+    to: string
+  ): Promise<boolean> => {
+    try {
+      const messageForCreater = `Your invoice ${invoiceId} has been deleted by the payer with reason: ${reason}`;
+      const messageForCustomer = `Your invoice ${invoiceId} has been deleted by ${from}, the creator of the invoice, with reason: ${reason}`;
 
-  //     return isVerified;
-  //   };
+      const payload = {
+        invoiceId,
+        from,
+        to,
+        messageForCreater,
+        messageForCustomer,
+      };
 
-  //   static notiyCancelInvoice = async (token: string): Promise<boolean> => {
-  //     return new Promise((resolveOuter) => {
-  //       resolveOuter(
-  //         new Promise((resolveInner) => {
-  //           setTimeout(resolveInner, 1000);
-  //         })
-  //       );
-  //     });
-  //   };
+      const res = await clientNotifyService.post<InvoiceResponse>(
+        '/api/notify/cancel-invoice',
+        {
+          payload,
+        }
+      );
+
+      return res.data.success;
+    } catch (error) {
+      console.log(error);
+    }
+  };
 }
