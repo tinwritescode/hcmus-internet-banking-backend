@@ -243,11 +243,28 @@ export class TransactionService {
     limit: number;
     offset: number;
   }) {
-    return prisma.transaction.findMany({
+    const result = await prisma.transaction.findMany({
       where,
       select: TransactionService.defaultSelector,
       skip: offset,
       take: limit,
     });
+
+    const total = await prisma.transaction.count({
+      where,
+    });
+
+    const returned: PagingResponse = {
+      data: result,
+      metadata: {
+        total,
+        page: Math.floor(offset / limit) + 1,
+        limit: limit,
+        hasNextPage: offset + limit < total,
+        hasPrevPage: offset > 0,
+      },
+    };
+
+    return returned;
   }
 }
