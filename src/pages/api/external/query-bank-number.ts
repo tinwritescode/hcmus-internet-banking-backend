@@ -13,9 +13,17 @@ const postDepositSchema = z.object({
 
 const ERR_10_DIGITS = "Account number must be 10 digits";
 
-const rawDataSchema = z.object({
-  accountNumber: z.string().min(10, ERR_10_DIGITS).max(10, ERR_10_DIGITS),
-});
+const rawDataSchema = z
+  .object({
+    accountNumber: z.string().min(10, ERR_10_DIGITS).max(10, ERR_10_DIGITS),
+    expiredAt: z.coerce.date(),
+  })
+  .refine((data) => {
+    if (data.expiredAt < new Date()) {
+      throw new ApiError("Expired", 400);
+    }
+    return true;
+  });
 
 // pay
 export default catchAsync(async function dangerouslyHandle(req, res) {
@@ -61,6 +69,8 @@ export default catchAsync(async function dangerouslyHandle(req, res) {
 //     JSON.stringify({
 //       // must be 10 number
 //       accountNumber: "1234567890",
+//       // plus 5 minutes
+//       expiredAt: new Date(Date.now() + 5 * 60 * 1000),
 //     })
 //   ).toString("base64");
 

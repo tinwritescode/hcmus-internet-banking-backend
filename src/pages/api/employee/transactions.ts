@@ -33,6 +33,7 @@ export default catchAsync(async function handle(req, res) {
       const result = await TransactionService.getTransaction({
         where: {
           extBankId: bankId,
+          type: "EXTERNAL",
           createdAt: {
             gte: startDate,
             lte: endDate,

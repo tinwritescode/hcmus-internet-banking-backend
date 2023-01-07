@@ -11,13 +11,21 @@ const postDepositSchema = z.object({
   data: z.string().min(1),
 });
 
-const rawDataSchema = z.object({
-  amount: z.number().min(1),
-  toAccountNumber: z.string().min(1),
-  message: z.string().min(1),
-  fromAccountNumber: z.string().min(1),
-  payer: z.enum(["receiver"]).nullable().optional().default(null),
-});
+const rawDataSchema = z
+  .object({
+    amount: z.number().min(1),
+    toAccountNumber: z.string().min(1),
+    message: z.string().min(1),
+    fromAccountNumber: z.string().min(1),
+    payer: z.enum(["receiver"]).nullable().optional().default(null),
+    expiredAt: z.coerce.date(),
+  })
+  .refine((data) => {
+    if (data.expiredAt < new Date()) {
+      throw new ApiError("Expired", 400);
+    }
+    return true;
+  });
 
 // pay
 export default catchAsync(async function dangerouslyHandle(req, res) {
@@ -38,7 +46,7 @@ export default catchAsync(async function dangerouslyHandle(req, res) {
       const decoded = Buffer.from(data, "base64").toString("utf8");
       validateSchema(rawDataSchema, JSON.parse(decoded));
       const { amount, toAccountNumber, message, fromAccountNumber, payer } =
-        rawDataSchema.parse(JSON.parse(decoded));
+        validateSchema(rawDataSchema, JSON.parse(decoded));
 
       const result = await CustomerService.dangerouslyReceiveMoney({
         amount,
