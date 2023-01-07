@@ -207,13 +207,17 @@ export class EmployeeService {
       take: limit,
     });
 
+    const count = await prisma.employeeLog.count({
+      where,
+    });
+
     const result: PagingResponse = {
       data: logs,
       metadata: {
-        total: logs.length,
+        total: count,
         page: offset / limit + 1,
         limit: limit,
-        hasNextPage: offset + limit < logs.length,
+        hasNextPage: offset + limit < count,
         hasPrevPage: offset > 0,
       },
     };
