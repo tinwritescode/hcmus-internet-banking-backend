@@ -3,6 +3,7 @@ import { CustomerService, defaultCustomerSelector } from "./customerService";
 import { ApiError, PagingResponse } from "../../core/baseResponse";
 import { Prisma } from "@prisma/client";
 import { prisma } from "../prisma";
+import { NotificationService } from "../notifyService";
 
 export class InvoiceService {
   static defaultSelector: Prisma.InvoiceSelect = {
@@ -93,6 +94,15 @@ export class InvoiceService {
         </div>
       `,
     });
+    // sendEmail({
+    //   to: result.receiverId,
+    //   subject: 'Invoice deleted',
+    //   html: `Invoice ${result.id} has been deleted\nCreator: ${
+    //     result.creator.firstName
+    //   } ${result.creator.lastName}\nAmount: ${result.amount}\n${
+    //     result.isPaid ? 'Paid at: ' + result.paidAt : ''
+    //   }}`,
+    // });
 
     return result;
   };
@@ -112,6 +122,7 @@ export class InvoiceService {
 
       return invoice;
     } catch (error) {
+      console.log(error);
       return null;
     }
   };

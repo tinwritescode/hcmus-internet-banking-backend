@@ -17,6 +17,7 @@
   "dependencies": {
     "@prisma/client": "^4.7.1",
     "@types/jsonwebtoken": "^8.5.9",
+    "axios": "^1.2.2",
     "bcrypt": "^5.1.0",
     "cors": "^2.8.5",
     "jsonwebtoken": "^8.5.1",

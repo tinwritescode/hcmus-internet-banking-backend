@@ -1,4 +1,4 @@
-import { sendEmail } from "./../../../lib/nodemailer";
+// import { sendEmail } from './../../../lib/nodemailer';
 import { LogService } from "./../../../lib/database/logService";
 import { InvoiceService } from "../../../lib/database/invoiceService";
 import { validateSchema } from "../../../core/catchAsync";
@@ -6,6 +6,8 @@ import { z } from "zod";
 import { catchAsync } from "../../../core/catchAsync";
 import { TokenService } from "../../../lib/database/tokenService";
 import { ApiError } from "../../../core/baseResponse";
+import { NotificationService } from "../../../lib/notifyService";
+import { sendEmail } from "../../../lib/nodemailer";
 
 const updateInvoiceSchema = z.object({
   amount: z.preprocess(BigInt, z.bigint()),
@@ -81,6 +83,23 @@ export default catchAsync(async function handle(req, res) {
             </div>
           `,
         }),
+        NotificationService.notificationCancelInvoice(
+          invoiceId,
+          reason,
+          result.creator.id,
+          result.customer.id
+        ),
+
+        // sendEmail({
+        //   to: result.creator.email,
+        //   subject: "Invoice deleted",
+        //   html: `Your invoice ${invoiceId} has been deleted by the payer with reason: ${reason}`,
+        // }),
+        // sendEmail({
+        //   to: result.customer.email,
+        //   subject: "Invoice deleted",
+        //   html: `Your invoice ${invoiceId} has been deleted by ${result.creator.firstName} ${result.creator.lastName}, the creator of the invoice, with reason: ${reason}`,
+        // }),
       ]);
 
       delete result.customer;
