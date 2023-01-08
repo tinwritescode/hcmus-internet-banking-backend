@@ -36,20 +36,34 @@ export class TransactionService {
     }
   };
 
-  static getTransactionsByCustomerId = async (
-    customerId: string,
-    type: string,
+  static getTransactionsByCustomerId = async ({
+    customerId,
+    type,
     offset = 0,
-    limit = 10
-  ) => {
+    limit = 10,
+    startDate,
+    endDate,
+  }: {
+    customerId: string;
+    type: "sent" | "received" | "all";
+    offset: number;
+    limit: number;
+    startDate?: Date;
+    endDate?: Date;
+  }) => {
     try {
       let dataResult = [];
       if (type === "sent") {
+        const where: Prisma.TransactionWhereInput = {
+          fromCustomerId: customerId,
+          createdAt: {
+            gte: startDate,
+            lte: endDate,
+          },
+        };
         dataResult = await Promise.all([
           prisma.transaction.findMany({
-            where: {
-              fromCustomerId: customerId,
-            },
+            where,
             select: TransactionService.defaultSelector,
             skip: offset,
             take: limit,
@@ -58,17 +72,20 @@ export class TransactionService {
             },
           }),
           prisma.transaction.count({
-            where: {
-              fromCustomerId: customerId,
-            },
+            where,
           }),
         ]);
       } else if (type === "received") {
+        const where = {
+          toCustomerId: customerId,
+          createdAt: {
+            gte: startDate,
+            lte: endDate,
+          },
+        };
         dataResult = await Promise.all([
           prisma.transaction.findMany({
-            where: {
-              toCustomerId: customerId,
-            },
+            where,
             select: TransactionService.defaultSelector,
             skip: offset,
             take: limit,
@@ -77,28 +94,29 @@ export class TransactionService {
             },
           }),
           prisma.transaction.count({
-            where: {
-              toCustomerId: customerId,
-            },
+            where,
           }),
         ]);
       } else {
+        const where = {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          OR: [
+            {
+              fromCustomerId: customerId,
+            },
+            {
+              toCustomerId: customerId,
+            },
+          ],
+          createdAt: {
+            gte: startDate,
+            lte: endDate,
+          },
+        };
+
         dataResult = await Promise.all([
           prisma.transaction.findMany({
-            // where: {
-            //   fromCustomerId: customerId,
-            // },
-            where: {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
-              OR: [
-                {
-                  fromCustomerId: customerId,
-                },
-                {
-                  toCustomerId: customerId,
-                },
-              ],
-            },
+            where,
             select: TransactionService.defaultSelector,
             skip: offset,
             take: limit,
@@ -107,17 +125,7 @@ export class TransactionService {
             },
           }),
           prisma.transaction.count({
-            where: {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
-              OR: [
-                {
-                  fromCustomerId: customerId,
-                },
-                {
-                  toCustomerId: customerId,
-                },
-              ],
-            },
+            where,
           }),
         ]);
       }
