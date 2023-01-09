@@ -4,7 +4,7 @@ import { catchAsync, validateSchema } from '../../../core/catchAsync';
 import { CustomerService } from '../../../lib/database/customerService';
 import { TokenService } from '../../../lib/database/tokenService';
 import { ApiError } from '../../../core/baseResponse';
-import { NotificationService } from '../../../lib/notifyService';
+import { NotificationService } from '../../../lib/database/notifyService';
 
 const createInvoiceSchema = z.object({
   accountNumber: z
