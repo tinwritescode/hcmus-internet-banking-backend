@@ -3,11 +3,23 @@ import { defaultCustomerSelector } from './customerService';
 import { InvoiceService } from './invoiceService';
 import { Prisma } from '@prisma/client';
 import { prisma } from '../prisma';
-import { ApiError, PagingResponse } from '../../core/baseResponse';
+import { ApiError } from '../../core/baseResponse';
+import { BaseResponse } from '../../core/baseResponse';
 
 interface InvoiceResponse {
   success: boolean;
   message?: string;
+}
+
+export interface PagingResponseNotify extends BaseResponse {
+  metadata: {
+    total: number;
+    totalUnread: number;
+    page: number;
+    limit: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
 }
 
 export const invoiceNotification = async (invoiceId: number | bigint) => {
@@ -64,10 +76,18 @@ export class NotificationService {
         },
       });
 
-      const result: PagingResponse = {
+      const totalUnread = await prisma.notification.count({
+        where: {
+          customerId,
+          isRead: false,
+        },
+      });
+
+      const result: PagingResponseNotify = {
         data: notifications,
         metadata: {
           total: total,
+          totalUnread,
           page: offset,
           limit: limit,
           hasNextPage: offset + limit < total,
@@ -98,7 +118,7 @@ export class NotificationService {
     }
   };
 
-  static updateNotification = async (notificationId: number | bigint) => {
+  static markNotificationAsRead = async (notificationId: number | bigint) => {
     try {
       return prisma.notification.update({
         where: {

@@ -4,7 +4,7 @@ import { TokenService } from '../../../lib/database/tokenService';
 import { NotificationService } from '../../../lib/database/notifyService';
 
 const readNotificationSchema = z.object({
-  notificationId: z.preprocess(parseInt, z.number().min(1)),
+  notificationId: z.preprocess(BigInt, z.bigint()),
 });
 
 export default catchAsync(async function handle(req, res) {
@@ -14,7 +14,7 @@ export default catchAsync(async function handle(req, res) {
     case 'PUT': {
       try {
         await TokenService.requireAuth(req);
-        await NotificationService.updateNotification(notificationId);
+        await NotificationService.markNotificationAsRead(notificationId);
       } catch (error) {
         console.log(error);
         res.status(500).json({ error: error.message });
