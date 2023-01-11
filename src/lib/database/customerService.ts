@@ -186,7 +186,7 @@ export class CustomerService {
         where: { id: payer === "sender" ? from : to },
         data: {
           balance: {
-            decrement: (amount as bigint) * BigInt(env.BASE_FEE),
+            decrement: BigInt(amount) * BigInt(env.BASE_FEE),
           },
         },
       }),
@@ -209,7 +209,7 @@ export class CustomerService {
   }: {
     from: string;
     to: string;
-    amount: bigint | number;
+    amount: bigint;
     message: string;
     payer: "receiver" | null;
   }) => {
@@ -225,13 +225,11 @@ export class CustomerService {
     // if payer is receiver, deduct the base fee
     const amountAfterFee =
       BigInt(amount) -
-      (amount as bigint) *
-        BigInt(env.BASE_FEE) *
-        (payer === "receiver" ? 1n : 0n);
+      BigInt(amount) * BigInt(env.BASE_FEE) * (payer === "receiver" ? 1n : 0n);
 
     const session = await prisma.$transaction([
       prisma.customer.update({
-        where: { id: to },
+        where: { accountNumber: to },
         data: {
           balance: {
             increment: amountAfterFee,
@@ -254,7 +252,7 @@ export class CustomerService {
               },
             },
           },
-          toCustomer: { connect: { id: to } },
+          toCustomer: { connect: { accountNumber: to } },
         },
         select: {
           id: true,

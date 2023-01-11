@@ -1,3 +1,4 @@
+import { RecipientService } from "./../../../lib/database/recipientService";
 import { TransactionService } from "../../../lib/database/transactionService";
 import { z } from "zod";
 import { ApiError } from "../../../core/baseResponse";
@@ -11,6 +12,9 @@ const internalTransferSchema = z.object({
   message: z.string().optional(),
   token: z.string(),
   payer: z.enum(["sender", "receiver"]),
+  saveInfo: z
+    .string()
+    .refine((value) => value === "true", { message: "Invalid value" }),
 });
 
 export default catchAsync(async function handle(req, res) {
@@ -27,7 +31,7 @@ export default catchAsync(async function handle(req, res) {
         throw new ApiError("Invalid request", 400);
       }
 
-      const { amount, to, message, token, payer } = data.data;
+      const { amount, to, message, token, payer, saveInfo } = data.data;
 
       await TransactionService.verifyTransactionToken(token);
 
@@ -44,6 +48,35 @@ export default catchAsync(async function handle(req, res) {
         message,
         payer,
       });
+
+      if (saveInfo) {
+        await RecipientService.createRecipient({
+          accountNumber: to,
+          internalBankCustomer: {
+            connect: {
+              id,
+            },
+          },
+          customerRecipient: {
+            connectOrCreate: {
+              where: {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                customerId_recipientId: {
+                  customerId: id,
+                  recipientId: to,
+                },
+              },
+              create: {
+                customerId: id,
+              },
+            },
+          },
+        }).catch(() => {
+          // ignore already exists error
+        });
+
+        console.log("result", result);
+      }
 
       res.status(200).json({ data: result });
       break;
