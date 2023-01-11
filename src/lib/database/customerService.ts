@@ -257,8 +257,8 @@ export class CustomerService {
         select: {
           id: true,
           amount: true,
-          fromCustomerId: true,
           toCustomerId: true,
+          fromRecipientId: true,
           recipientId: true,
         },
       }),
