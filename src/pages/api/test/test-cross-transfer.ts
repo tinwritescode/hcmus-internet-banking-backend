@@ -20,8 +20,7 @@ async function test() {
 
   const signedData = await sign(rawData);
 
-  //   const API_URL = "https://hcmus-internet-banking-backend.vercel.app";
-  const API_URL = "http://localhost:3000";
+  const API_URL = "https://hcmus-internet-banking-backend.vercel.app";
 
   const res = await axios.post(
     `${API_URL}/api/external/deposit`,
@@ -35,15 +34,14 @@ async function test() {
   );
 
   console.table(res.data);
+
+  return res.data;
 }
 
 export default catchAsync(async function dangerouslyHandle(req, res) {
   switch (req.method) {
     case "POST": {
-      const result = await test().catch((err) => {
-        console.log(err.response.data);
-        console.log("hi");
-      });
+      const result = await test();
 
       res.status(200).json({
         data: result,

@@ -252,7 +252,6 @@ export class CustomerService {
               },
             },
           },
-          fromCustomer: { connect: { accountNumber: to } },
           toCustomer: { connect: { accountNumber: to } },
         },
         select: {
