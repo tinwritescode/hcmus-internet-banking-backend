@@ -37,6 +37,7 @@ export default catchAsync(async function dangerouslyHandle(req, res) {
         signature,
         publicKeyPath: path.join(process.cwd(), "public/pubkey.pub"),
       });
+
       if (!isValid) {
         throw new ApiError("Invalid signature", 400);
       }

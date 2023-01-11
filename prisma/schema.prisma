@@ -72,7 +72,7 @@ model Transaction {
   updatedAt      DateTime        @updatedAt @map("updated_at")
   deletedAt      DateTime?       @map("deleted_at")
   type           TransactionType
-  fromCustomerId String          @map("from_customer_id")
+  fromCustomerId String?         @map("from_customer_id")
   toCustomerId   String          @map("to_customer_id")
   fromCustomer   Customer?       @relation("from_transactions", fields: [fromCustomerId], references: [id])
   toCustomer     Customer?       @relation("to_transactions", fields: [toCustomerId], references: [id])

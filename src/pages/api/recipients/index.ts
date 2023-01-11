@@ -20,12 +20,11 @@ const createRecipientSchema = z.object({
 export default catchAsync(async function handle(req, res) {
   switch (req.method) {
     case "POST": {
-      validateSchema(createRecipientSchema, req.body);
       const {
         payload: { id },
       } = await TokenService.requireAuth(req);
 
-      const { accountNumber } = req.body;
+      const { accountNumber } = validateSchema(createRecipientSchema, req.body);
       const mnemonicName = req.body.mnemonicName;
 
       const isInternalBank = req.body.isInternalBank || true;
