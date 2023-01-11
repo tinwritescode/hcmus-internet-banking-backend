@@ -4,7 +4,7 @@ import { catchAsync } from '../../../../core/catchAsync';
 import { InvoiceService } from '../../../../lib/database/invoiceService';
 import { TokenService } from '../../../../lib/database/tokenService';
 import { ApiError } from '../../../../core/baseResponse';
-import { NotificationService } from '../../../../lib/notifyService';
+import { NotificationService } from '../../../../lib/database/notifyService';
 
 const postPayInvoiceSchema = z.object({
   otp: z.string().min(1),
