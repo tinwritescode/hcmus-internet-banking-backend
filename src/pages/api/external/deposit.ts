@@ -49,7 +49,7 @@ export default catchAsync(async function dangerouslyHandle(req, res) {
         validateSchema(rawDataSchema, JSON.parse(decoded));
 
       const result = await CustomerService.dangerouslyReceiveMoney({
-        amount,
+        amount: BigInt(amount),
         from: fromAccountNumber,
         to: toAccountNumber,
         message,
