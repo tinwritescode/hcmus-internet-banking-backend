@@ -21,18 +21,20 @@ export default catchAsync(async function handle(req, res) {
       //   await TokenService.requireAuth(req);
 
       const banks = await InterBankService.getInterBanks();
-      //   const test = await getKarmaAccountInfoBySoTK({
-      //     soTK: "3171918615",
-      //     tenNH: "HCMUSBank",
-      //   });
-      const testTransfer = await postKarmaTransfer({
-        soTien: 1234,
-        noiDungCK: "test",
-        nguoiNhan: "3171918615",
-        nguoiChuyen: "3171918615",
+      const test = await getKarmaAccountInfoBySoTK({
+        soTK: "8768330872",
+        tenNH: "HCMUSBank",
       });
-      //   console.log("test", test);
-      console.log("testTransfer", testTransfer);
+      // const testTransfer = await postKarmaTransfer({
+      //   soTien: 1234,
+      //   noiDungCK: "test",
+      //   nguoiNhan: "3171918615",
+      //   nguoiChuyen: "3171918615",
+      //   loaiCK: "sender",
+      //   tenNH: "HCMUSBank",
+      // });
+      console.log("test", test);
+      // console.log("testTransfer", testTransfer.data);
 
       res.status(200).json({ data: banks });
       break;
