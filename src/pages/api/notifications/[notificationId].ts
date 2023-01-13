@@ -13,8 +13,14 @@ export default catchAsync(async function handle(req, res) {
   switch (req.method) {
     case 'PUT': {
       try {
-        await TokenService.requireAuth(req);
-        await NotificationService.markNotificationAsRead(notificationId);
+        await Promise.all([
+          TokenService.requireAuth(req),
+          NotificationService.markNotificationAsRead(notificationId),
+        ]);
+
+        res.status(200).json({
+          data: { message: 'Notification marked as read' },
+        });
       } catch (error) {
         console.log(error);
         res.status(500).json({ error: error.message });
