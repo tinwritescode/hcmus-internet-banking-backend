@@ -63,7 +63,6 @@ export const postKarmaTransfer = async (data: {
     ngayTao: timestamp,
     chuKy: signature,
   };
-  console.log(payload);
   try {
     const res = await clientKarma.post("/interbank/api/transfer", payload);
     const { chuKy, ...data } = res.data;
@@ -75,7 +74,6 @@ export const postKarmaTransfer = async (data: {
     if (!verified) {
       throw new Error("Signature is not verified");
     }
-    // create new external transaction
 
     return res;
   } catch (error) {

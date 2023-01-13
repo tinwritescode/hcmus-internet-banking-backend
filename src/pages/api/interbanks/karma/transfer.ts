@@ -1,9 +1,10 @@
-import { TransactionService } from "../../../lib/database/transactionService";
+import { TransactionService } from "../../../../lib/database/transactionService";
 import { z } from "zod";
-import { ApiError } from "../../../core/baseResponse";
-import { catchAsync, validateSchema } from "../../../core/catchAsync";
-import { CustomerService } from "../../../lib/database/customerService";
-import { TokenService } from "../../../lib/database/tokenService";
+import { ApiError } from "../../../../core/baseResponse";
+import { catchAsync, validateSchema } from "../../../../core/catchAsync";
+import { CustomerService } from "../../../../lib/database/customerService";
+import { TokenService } from "../../../../lib/database/tokenService";
+import { postKarmaTransfer } from "../../../../lib/karma";
 
 const externalTransferSchema = z.object({
   amount: z.preprocess(BigInt, z.bigint()).refine((amount) => amount > 0),
@@ -36,15 +37,25 @@ export default catchAsync(async function handle(req, res) {
         withEmail: false,
       });
 
-      const result = await CustomerService.transferInternally({
-        from: fromCustomer.accountNumber,
-        to: to,
-        amount,
-        message,
-        payer,
+      const isTrans = await postKarmaTransfer({
+        soTien: amount as any,
+        noiDungCK: message,
+        nguoiNhan: to,
+        nguoiChuyen: fromCustomer.accountNumber,
+        loaiCK: "sender",
+        tenNH: "HCMUSBank",
       });
 
-      res.status(200).json({ data: result });
+      if (!isTrans) {
+        await CustomerService.transferInternally({
+          from: fromCustomer.accountNumber,
+          to: to,
+          amount,
+          message,
+          payer,
+        });
+      }
+      res.status(200).json({ data: isTrans });
       break;
     }
     default:
