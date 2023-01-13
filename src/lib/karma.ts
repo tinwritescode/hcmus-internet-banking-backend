@@ -1,14 +1,15 @@
 import axios, { AxiosInstance, isAxiosError } from "axios";
 import crypto from "crypto";
 import fs from "fs/promises";
-import { TransactionService } from "./database/transactionService";
 
 const clientKarma: AxiosInstance = axios.create({
   baseURL: process.env.KARMABANK_URL,
 });
 
 export const getKarmaAccountInfoBySoTK = async (data: any) => {
-  const timestamp = new Date().toISOString();
+  const timestamp = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "Asia/Singapore" })
+  ).toISOString();
   const privateKey = await fs.readFile("public/karma.private.key");
   const sign = crypto.createSign("RSA-SHA256");
   sign.update(JSON.stringify({ ...data, ngayTao: timestamp }));
