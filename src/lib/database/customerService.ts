@@ -1,10 +1,10 @@
-import { comparePassword, hashPassword } from "../bcrypt";
-import { TokenService } from "./tokenService";
-import { Prisma, TokenType } from "@prisma/client";
-import { ApiError } from "../../core/baseResponse";
-import { prisma } from "../prisma";
-import moment from "moment";
-import { env } from "../../core/env/server.mjs";
+import { comparePassword, hashPassword } from '../bcrypt';
+import { TokenService } from './tokenService';
+import { Prisma, TokenType } from '@prisma/client';
+import { ApiError } from '../../core/baseResponse';
+import { prisma } from '../prisma';
+import moment from 'moment';
+import { env } from '../../core/env/server.mjs';
 
 export const defaultCustomerSelector: Prisma.CustomerSelect = {
   id: true,
@@ -20,7 +20,7 @@ export type DefaultCustomerSelector = Prisma.CustomerGetPayload<{
 export class CustomerService {
   static createCustomer = async (customer: Prisma.CustomerCreateInput) => {
     try {
-      const isDev = process.env.NODE_ENV === "development";
+      const isDev = process.env.NODE_ENV === 'development';
 
       const newCustomer = await prisma.customer.create({
         data: {
@@ -35,8 +35,8 @@ export class CustomerService {
 
       return newCustomer;
     } catch (error) {
-      if (error.code === "P2002") {
-        throw new ApiError("Email already exists", 400);
+      if (error.code === 'P2002') {
+        throw new ApiError('Email already exists', 400);
       }
 
       throw error;
@@ -57,7 +57,7 @@ export class CustomerService {
       const isPasswordValid = await comparePassword(password, hashedPassword);
 
       if (!isPasswordValid) {
-        throw new ApiError("Invalid credentials", 401);
+        throw new ApiError('Invalid credentials', 401);
       }
 
       const customer = await prisma.customer.findFirst({
@@ -68,7 +68,7 @@ export class CustomerService {
       });
 
       if (!customer) {
-        throw new ApiError("Invalid credentials", 401);
+        throw new ApiError('Invalid credentials', 401);
       }
 
       const [refreshToken, accessToken] = await Promise.all([
@@ -77,7 +77,7 @@ export class CustomerService {
           expiredAt: moment()
             .add(
               parseInt(process.env.REFRESH_TOKEN_EXPIRES_IN_DAYS) || 30,
-              "days"
+              'days'
             )
             .toDate(),
 
@@ -97,8 +97,8 @@ export class CustomerService {
         },
       };
     } catch (error) {
-      if (error instanceof ApiError || error.code === "P2025") {
-        throw new ApiError("Invalid credentials", 401);
+      if (error instanceof ApiError || error.code === 'P2025') {
+        throw new ApiError('Invalid credentials', 401);
       }
     }
   };
@@ -114,20 +114,20 @@ export class CustomerService {
     to: string;
     amount: bigint | number;
     message: string;
-    payer: "sender" | "receiver";
+    payer: 'sender' | 'receiver';
   }) => {
     if (from === to) {
       throw new ApiError("You can't transfer to yourself", 400);
     }
-    console.log("from", from);
-    console.log("to", to);
+    console.log('from', from);
+    console.log('to', to);
 
     await prisma.customer
       .findUniqueOrThrow({
         where: { id: to },
       })
       .catch(() => {
-        throw new ApiError("Invalid recipient", 400);
+        throw new ApiError('Invalid recipient', 400);
       });
 
     const customer = await prisma.customer
@@ -135,11 +135,11 @@ export class CustomerService {
         where: { id: from },
       })
       .catch(() => {
-        throw new ApiError("Invalid sender", 400);
+        throw new ApiError('Invalid sender', 400);
       });
 
     if (customer.balance < amount) {
-      throw new ApiError("Insufficient balance", 400);
+      throw new ApiError('Insufficient balance', 400);
     }
 
     const session = await prisma.$transaction([
@@ -170,7 +170,7 @@ export class CustomerService {
         data: {
           amount,
           message,
-          type: "INTERNAL",
+          type: 'INTERNAL',
           fromCustomer: { connect: { id: from } },
           toCustomer: { connect: { id: to } },
         },
@@ -183,7 +183,7 @@ export class CustomerService {
         },
       }),
       prisma.customer.update({
-        where: { id: payer === "sender" ? from : to },
+        where: { id: payer === 'sender' ? from : to },
         data: {
           balance: {
             decrement: BigInt(amount) * BigInt(env.BASE_FEE),
@@ -211,7 +211,7 @@ export class CustomerService {
     to: string;
     amount: bigint;
     message: string;
-    payer: "receiver" | null;
+    payer: 'receiver' | null;
   }) => {
     // check if the customer exists
     await prisma.customer
@@ -219,13 +219,13 @@ export class CustomerService {
         where: { accountNumber: to },
       })
       .catch(() => {
-        throw new ApiError("Invalid recipient", 400);
+        throw new ApiError('Invalid recipient', 400);
       });
 
     // if payer is receiver, deduct the base fee
     const amountAfterFee =
       BigInt(amount) -
-      BigInt(amount) * BigInt(env.BASE_FEE) * (payer === "receiver" ? 1n : 0n);
+      BigInt(amount) * BigInt(env.BASE_FEE) * (payer === 'receiver' ? 1n : 0n);
 
     const session = await prisma.$transaction([
       prisma.customer.update({
@@ -243,7 +243,7 @@ export class CustomerService {
         data: {
           amount,
           message,
-          type: "EXTERNAL",
+          type: 'EXTERNAL',
           fromRecipient: {
             connectOrCreate: {
               where: { accountNumber: from },
@@ -308,7 +308,7 @@ export class CustomerService {
     const token = await TokenService.getToken(refreshToken);
 
     if (!token) {
-      throw new ApiError("Invalid token", 401);
+      throw new ApiError('Invalid token', 401);
     }
 
     return CustomerService.getCustomerById(token.customerId, {
