@@ -13,7 +13,12 @@ export class TransactionService {
     createdAt: true,
     fromCustomer: { select: defaultCustomerSelector },
     toCustomer: { select: defaultCustomerSelector },
-    // recipient: { select: RecipientService.defaultSelector },
+    fromRecipient: {
+      select: {
+        accountNumber: true,
+        mnemonicName: true,
+      },
+    },
     message: true,
     id: true,
     type: true,
@@ -64,7 +69,10 @@ export class TransactionService {
         dataResult = await Promise.all([
           prisma.transaction.findMany({
             where,
-            select: TransactionService.defaultSelector,
+            select: {
+              ...TransactionService.defaultSelector,
+              fromRecipient: true,
+            },
             skip: offset,
             take: limit,
             orderBy: {
