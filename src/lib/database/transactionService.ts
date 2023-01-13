@@ -253,7 +253,18 @@ export class TransactionService {
   }) {
     const result = await prisma.transaction.findMany({
       where,
-      select: TransactionService.defaultSelector,
+      select: {
+        ...TransactionService.defaultSelector,
+        fromRecipient: {
+          include: {
+            customerRecipient: true,
+            fromTransaction: true,
+            internalBankCustomer: true,
+            toTransaction: true,
+            transactions: true,
+          },
+        },
+      },
       skip: offset,
       take: limit,
     });
