@@ -243,6 +243,7 @@ export class CustomerService {
       }),
 
       prisma.transaction.create({
+        // @ts-ignore
         data: {
           amount,
           message,
