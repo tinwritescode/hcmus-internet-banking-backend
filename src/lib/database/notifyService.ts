@@ -163,7 +163,10 @@ export class NotificationService {
         NotificationService.createNotification({
           type: 'DEBT_PAID',
           title: 'Invoice paid',
-          text: `You have paid an invoice to ${data.creator.firstName} ${data.creator.lastName}`,
+          text: JSON.stringify({
+            payload,
+            message: `You have paid an invoice to ${data.creator.firstName} ${data.creator.lastName}`,
+          }),
           customer: {
             connect: {
               id: data.customer.id,
@@ -174,7 +177,10 @@ export class NotificationService {
         NotificationService.createNotification({
           type: 'DEBT_PAID',
           title: 'Invoice paid',
-          text: `You have received a payment from ${data.customer.firstName} ${data.customer.lastName}`,
+          text: JSON.stringify({
+            payload,
+            message: `You have received a payment from ${data.customer.firstName} ${data.customer.lastName}`,
+          }),
           customer: {
             connect: {
               id: data.creator.id,
@@ -213,7 +219,10 @@ export class NotificationService {
         NotificationService.createNotification({
           type: 'DEBT_CREATED',
           title: 'Invoice created',
-          text: `You have created an invoice to ${data.customer.firstName} ${data.customer.lastName} with amount $${data.amount}`,
+          text: JSON.stringify({
+            payload,
+            message: `You have created an invoice to ${data.customer.firstName} ${data.customer.lastName} with amount $${data.amount}`,
+          }),
           customer: {
             connect: {
               id: data.creator.id,
@@ -224,7 +233,10 @@ export class NotificationService {
         NotificationService.createNotification({
           type: 'DEBT_CREATED',
           title: 'Invoice created',
-          text: `You have created an invoice from ${data.creator.firstName} ${data.creator.lastName} with amount $${data.amount}`,
+          text: JSON.stringify({
+            payload,
+            message: `You have created an invoice from ${data.creator.firstName} ${data.creator.lastName} with amount $${data.amount}`,
+          }),
           customer: {
             connect: {
               id: data.customer.id,
@@ -270,7 +282,10 @@ export class NotificationService {
         NotificationService.createNotification({
           type: 'DEBT_DELETED',
           title: 'Invoice canceled',
-          text: messageForCreater,
+          text: JSON.stringify({
+            payload,
+            message: messageForCreater,
+          }),
           customer: {
             connect: {
               id: from.id,
@@ -281,7 +296,10 @@ export class NotificationService {
         NotificationService.createNotification({
           type: 'DEBT_DELETED',
           title: 'Invoice canceled',
-          text: messageForCustomer,
+          text: JSON.stringify({
+            payload,
+            message: messageForCustomer,
+          }),
           customer: {
             connect: {
               id: to.id,
