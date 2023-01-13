@@ -5,7 +5,6 @@ import { ApiError } from "../../core/baseResponse";
 import { prisma } from "../prisma";
 import moment from "moment";
 import { env } from "../../core/env/server.mjs";
-import { getInterBanks } from "./interBankService";
 
 export const defaultCustomerSelector: Prisma.CustomerSelect = {
   id: true,
@@ -200,107 +199,92 @@ export class CustomerService {
     };
   };
 
-  // static transferExternally = async ({
-  //   amount,
-  //   from,
-  //   to,
-  //   message,
-  //   payer,
-  // }: {
-  //   from: string;
-  //   to: string;
-  //   amount: bigint | number;
-  //   message: string;
-  //   payer: "sender" | "receiver";
-  // }) => {
-  //   if (from === to) {
-  //     throw new ApiError("You can't transfer to yourself", 400);
-  //   }
+  static transferExternally = async ({
+    amount,
+    fromAccountNumber,
+    toAccountNumber,
+    message,
+    payer,
+  }: {
+    fromAccountNumber: string;
+    toAccountNumber: string;
+    amount: bigint | number;
+    message: string;
+    payer: "sender" | "receiver";
+  }) => {
+    if (fromAccountNumber === toAccountNumber) {
+      throw new ApiError("You can't transfer to yourself", 400);
+    }
 
-  //   await prisma.recipient
-  //     .findUniqueOrThrow({
-  //       where: { accountNumber: to },
-  //     })
-  //     .catch(() => {
-  //       throw new ApiError("Invalid recipient", 400);
-  //     });
+    const customer = await prisma.customer
+      .findUniqueOrThrow({
+        where: { id: fromAccountNumber },
+      })
+      .catch(() => {
+        throw new ApiError("Invalid sender", 400);
+      });
 
-  //   const customer = await prisma.customer
-  //     .findUniqueOrThrow({
-  //       where: { id: from },
-  //     })
-  //     .catch(() => {
-  //       throw new ApiError("Invalid sender", 400);
-  //     });
+    if (customer.balance < amount) {
+      throw new ApiError("Insufficient balance", 400);
+    }
 
-  //   if (customer.balance < amount) {
-  //     throw new ApiError("Insufficient balance", 400);
-  //   }
+    const session = await prisma.$transaction([
+      prisma.customer.update({
+        where: { accountNumber: fromAccountNumber },
+        data: {
+          balance: {
+            decrement: amount,
+          },
+        },
+        select: {
+          ...defaultCustomerSelector,
+          balance: true,
+        },
+      }),
 
-  //   const karmaBankID = await prisma.bank
-  //     .findFirstOrThrow({
-  //       where: { name: "KarmaBank" },
-  //       select: { id: true, name: true, address: true },
-  //     })
-  //     .catch(() => {
-  //       throw new ApiError("KarmaBank not exist", 400);
-  //     });
+      prisma.transaction.create({
+        data: {
+          amount,
+          message,
+          type: "EXTERNAL",
+          fromCustomer: { connect: { id: fromAccountNumber } },
+          toRecipient: {
+            connectOrCreate: {
+              where: {
+                accountNumber: toAccountNumber,
+              },
+              create: {
+                accountNumber: toAccountNumber,
+              },
+            },
+          },
+        },
+        select: {
+          id: true,
+          message: true,
+          type: true,
+          amount: true,
+          fromCustomer: true,
+          toRecipientId: true,
+        },
+      }),
+      payer === "sender"
+        ? prisma.customer.update({
+            where: { accountNumber: fromAccountNumber },
+            data: {
+              balance: {
+                decrement: BigInt(amount) * BigInt(env.BASE_FEE),
+              },
+            },
+          })
+        : null,
+    ]);
 
-  //   const toRecipient = await prisma.recipient.upsert({
-  //     where: { accountNumber: to },
-  //     update: {},
-  //     create: {
-  //       accountNumber: to,
-  //       bank: { connect: { id: karmaBankID.id } },
-  //     }
-  //   });
-
-  //   const session = await prisma.$transaction([
-  //     prisma.customer.update({
-  //       where: { id: from },
-  //       data: {
-  //         balance: {
-  //           decrement: amount,
-  //         },
-  //       },
-  //       select: {
-  //         ...defaultCustomerSelector,
-  //         balance: true,
-  //       },
-  //     }),
-
-  //     prisma.transaction.create({
-  //       data: {
-  //         amount,
-  //         message,
-  //         type: "EXTERNAL",
-  //         fromCustomer: { connect: { id: from } },
-  //         toRecipientId: toRecipient.id,
-  //         extBankId: karmaBankID.id,
-  //       },
-  //       select: {
-  //         id: true,
-  //         amount: true,
-  //         fromCustomerId: true,
-  //         toCustomerId: true,
-  //         recipientId: true,
-  //       },
-  //     }),
-  //     prisma.customer.update({
-  //       where: { id: payer === "sender" ? from : to },
-  //       data: {
-  //         balance: {
-  //           decrement: BigInt(amount) * BigInt(env.BASE_FEE),
-  //         },
-  //       },
-  //     }),
-  //   ]);
-
-  //   return {
-  //     from: session[0],
-  //     transaction: session[1],
-  //   };
-  // };
+    return {
+      from: session[0],
+      transaction: session[1],
+    };
+  };
 
   // Receive money from another bank
   static dangerouslyReceiveMoney = async ({
