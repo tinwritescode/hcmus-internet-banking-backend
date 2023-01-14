@@ -218,7 +218,7 @@ export class CustomerService {
 
     const customer = await prisma.customer
       .findUniqueOrThrow({
-        where: { id: fromAccountNumber },
+        where: { accountNumber: fromAccountNumber },
       })
       .catch(() => {
         throw new ApiError("Invalid sender", 400);
@@ -258,6 +258,7 @@ export class CustomerService {
               },
             },
           },
+          // toCustomer: { connect: { id: fromAccountNumber } }, required
         },
         select: {
           id: true,
