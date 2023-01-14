@@ -7,35 +7,31 @@ async function test() {
   // decoded
   const rawData = Buffer.from(
     JSON.stringify({
-      fromAccountNumber: "8768330872",
-      toAccountNumber: "7403340318",
-      amount: 49999,
-      message: "hello",
-      payer: "receiver",
+      accountNumber: "7403340318",
       expiredAt: new Date(Date.now() + 5 * 60 * 1000),
     })
   ).toString("base64");
 
-  // await rawDataSchema.parseAsync(rawData);
-
   const signedData = await sign(rawData);
 
-  const API_URL = "https://hcmus-internet-banking-backend.vercel.app";
+  const API_URL = "http://localhost:3000";
 
   const res = await axios.post(
-    `${API_URL}/api/external/deposit`,
+    `${API_URL}/api/external/query-bank-number`,
     {
       data: rawData,
       signature: signedData,
     },
     {
       timeout: 20000,
+      validateStatus: (status) => status < 500,
     }
   );
 
   console.table(res.data);
 
   return res.data;
+  return "";
 }
 
 export default catchAsync(async function dangerouslyHandle(req, res) {
@@ -43,10 +39,9 @@ export default catchAsync(async function dangerouslyHandle(req, res) {
     case "POST": {
       const result = await test();
 
-      res.status(200).json({
+      return res.status(200).json({
         data: result,
       });
-      break;
     }
 
     default: {
