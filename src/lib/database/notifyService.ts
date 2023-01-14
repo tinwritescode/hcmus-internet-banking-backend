@@ -260,8 +260,8 @@ export class NotificationService {
     to: any
   ): Promise<boolean> => {
     try {
-      const messageForCreater = `Your invoice #${invoiceId} has been deleted by the payer with reason: ${reason}`;
-      const messageForCustomer = `Your invoice #${invoiceId} has been deleted by ${from.firstName} ${from.lastName}, the creator of the invoice, with reason: ${reason}`;
+      const messageForCreater = `Invoice #${invoiceId} has been deleted with reason: ${reason}`;
+      const messageForCustomer = `Invoice #${invoiceId} has been deleted with reason: ${reason}`;
 
       const payload = {
         invoiceId,
