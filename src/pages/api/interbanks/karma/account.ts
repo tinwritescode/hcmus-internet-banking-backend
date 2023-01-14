@@ -13,14 +13,23 @@ export default catchAsync(async function handle(req, res) {
       if (!accountNumber) {
         throw new ApiError("Invalid request", 400);
       }
-      const result = await getKarmaAccountInfoBySoTK({
-        soTK: accountNumber as string,
-        tenNH: "HCMUSBank",
-      });
-      const { chuKy, ...data } = result.data;
 
-      res.status(200).json({ data: data });
-      break;
+      try {
+        const result = await getKarmaAccountInfoBySoTK({
+          soTK: accountNumber as string,
+          tenNH: "HCMUSBank",
+        });
+
+        if (result) {
+          const { chuKy, ...ret } = result.data;
+          res.status(200).json({ data: ret });
+        } else {
+          throw new ApiError("Invalid request", 400);
+        }
+        break;
+      } catch (error) {
+        throw new ApiError(error.message, 400);
+      }
     }
     default:
       res.status(405).json({
