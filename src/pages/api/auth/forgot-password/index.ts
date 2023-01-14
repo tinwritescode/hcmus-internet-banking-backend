@@ -28,7 +28,7 @@ export default catchAsync(async function handle(req, res) {
           .toDate(),
       });
 
-      sendEmail({
+      await sendEmail({
         to: email,
         subject: "Reset your password",
         html: `

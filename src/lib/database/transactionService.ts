@@ -200,7 +200,7 @@ export class TransactionService {
       })
     ).email;
 
-    sendEmail({
+    await sendEmail({
       to: userEmail,
       subject: "Transfer token",
       html: `
