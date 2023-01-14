@@ -19,8 +19,13 @@ export class RecipientService {
 
   static createRecipient = async (recipient: Prisma.RecipientCreateInput) => {
     try {
-      return await prisma.recipient.create({
-        data: recipient,
+      // create or connect if recipient already exists
+      return await prisma.recipient.upsert({
+        where: {
+          accountNumber: recipient.accountNumber,
+        },
+        create: recipient,
+        update: recipient,
       });
     } catch (error) {
       // P2002
