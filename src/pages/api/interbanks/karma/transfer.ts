@@ -32,35 +32,40 @@ export default catchAsync(async function handle(req, res) {
 
       await TransactionService.verifyTransactionToken(token);
 
-      const fromCustomer = await CustomerService.getCustomerById(id, {
-        withBalance: false,
-        withEmail: false,
-      });
-
-      const isTrans = await postKarmaTransfer({
-        soTien: amount,
-        noiDungCK: message,
-        nguoiNhan: to,
-        nguoiChuyen: fromCustomer.accountNumber,
-        loaiCK: "sender",
-        tenNH: "HCMUSBank",
-      });
-
-      if (isTrans) {
-        await CustomerService.transferExternally({
-          fromAccountNumber: fromCustomer.accountNumber,
-          toAccountNumber: to,
-          amount,
-          message,
-          payer,
+      try {
+        const fromCustomer = await CustomerService.getCustomerById(id, {
+          withBalance: false,
+          withEmail: false,
         });
-        const { chuKy, ...ret } = isTrans.data;
-        console.log(ret);
-        res.status(200).json({ data: ret });
+
+        const isTrans = await postKarmaTransfer({
+          soTien: amount,
+          noiDungCK: message,
+          nguoiNhan: to,
+          nguoiChuyen: fromCustomer.accountNumber,
+          loaiCK: "sender",
+          tenNH: "HCMUSBank",
+        });
+
+        if (isTrans) {
+          await CustomerService.transferExternally({
+            fromAccountNumber: fromCustomer.accountNumber,
+            toAccountNumber: to,
+            amount,
+            message,
+            payer,
+          });
+          const { chuKy, ...ret } = isTrans.data;
+          console.log(ret);
+          res.status(200).json({ data: ret });
+          break;
+        }
+        res.status(400).json({ error: { message: "Transfer failed" } });
+      } catch (error) {
+        console.log(error);
+        res.status(400).json({ error: { message: "Transfer failed" } });
         break;
       }
-      res.status(400).json({ error: { message: "Transfer failed" } });
-      break;
     }
     default:
       res.status(405).json({
