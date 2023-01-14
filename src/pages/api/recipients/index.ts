@@ -24,8 +24,10 @@ export default catchAsync(async function handle(req, res) {
         payload: { id },
       } = await TokenService.requireAuth(req);
 
-      const { accountNumber } = validateSchema(createRecipientSchema, req.body);
-      const mnemonicName = req.body.mnemonicName;
+      const { accountNumber, mnemonicName } = validateSchema(
+        createRecipientSchema,
+        req.body
+      );
 
       const isInternalBank = req.body.isInternalBank || true;
 
@@ -40,7 +42,7 @@ export default catchAsync(async function handle(req, res) {
         mnemonicName,
         internalBankCustomer: {
           connect: {
-            id,
+            accountNumber: accountNumber as string,
           },
         },
         customerRecipient: {
@@ -54,6 +56,7 @@ export default catchAsync(async function handle(req, res) {
             },
             create: {
               customerId: id,
+              mnemonicName,
             },
           },
         },

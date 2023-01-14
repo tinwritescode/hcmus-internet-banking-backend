@@ -46,11 +46,12 @@ model Recipient {
 }
 
 model CustomerRecipient {
-  id          BigInt    @id @default(autoincrement())
-  customerId  String    @map("customer_id")
-  recipientId String    @map("recipient_id")
-  customer    Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  recipient   Recipient @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  id           BigInt    @id @default(autoincrement())
+  customerId   String    @map("customer_id")
+  recipientId  String    @map("recipient_id")
+  customer     Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  recipient    Recipient @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  mnemonicName String?   @map("mnemonic_name")
 
   @@unique([customerId, recipientId])
   @@index([customerId])
