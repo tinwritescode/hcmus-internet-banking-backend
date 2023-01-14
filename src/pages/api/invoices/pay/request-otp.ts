@@ -22,7 +22,7 @@ export default catchAsync(async function handle(req, res) {
         })
       ).email;
 
-      sendEmail({
+      await sendEmail({
         to: email,
         subject: "Pay Invoice OTP",
         html: `

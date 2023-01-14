@@ -19,6 +19,12 @@ export class TransactionService {
         mnemonicName: true,
       },
     },
+    toRecipient: {
+      select: {
+        accountNumber: true,
+        mnemonicName: true,
+      },
+    },
     message: true,
     id: true,
     type: true,
@@ -200,7 +206,7 @@ export class TransactionService {
       })
     ).email;
 
-    sendEmail({
+    await sendEmail({
       to: userEmail,
       subject: "Transfer token",
       html: `
