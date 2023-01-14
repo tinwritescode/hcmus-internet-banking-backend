@@ -12,9 +12,7 @@ const internalTransferSchema = z.object({
   message: z.string().optional(),
   token: z.string(),
   payer: z.enum(["sender", "receiver"]),
-  saveInfo: z
-    .string()
-    .refine((value) => value === "true", { message: "Invalid value" }),
+  saveInfo: z.coerce.boolean().default(false),
 });
 
 export default catchAsync(async function handle(req, res) {
