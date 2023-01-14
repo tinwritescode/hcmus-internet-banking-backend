@@ -247,7 +247,7 @@ export class CustomerService {
           amount,
           message,
           type: "EXTERNAL",
-          fromCustomer: { connect: { id: fromAccountNumber } },
+          fromCustomer: { connect: { accountNumber: fromAccountNumber } },
           toRecipient: {
             connectOrCreate: {
               where: {
