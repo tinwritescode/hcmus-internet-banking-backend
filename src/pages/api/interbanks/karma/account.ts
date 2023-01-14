@@ -1,5 +1,5 @@
 import { ApiError } from "../../../../core/baseResponse";
-import { catchAsync, validateSchema } from "../../../../core/catchAsync";
+import { catchAsync } from "../../../../core/catchAsync";
 import { TokenService } from "../../../../lib/database/tokenService";
 import { getKarmaAccountInfoBySoTK } from "../../../../lib/karma";
 
@@ -17,8 +17,9 @@ export default catchAsync(async function handle(req, res) {
         soTK: accountNumber as string,
         tenNH: "HCMUSBank",
       });
+      const { chuKy, ...data } = result.data;
 
-      res.status(200).json({ data: result });
+      res.status(200).json({ data: data });
       break;
     }
     default:

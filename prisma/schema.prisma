@@ -73,7 +73,7 @@ model Transaction {
   deletedAt      DateTime?       @map("deleted_at")
   type           TransactionType
   fromCustomerId String?         @map("from_customer_id")
-  toCustomerId   String          @map("to_customer_id")
+  toCustomerId   String?         @map("to_customer_id")
   fromCustomer   Customer?       @relation("from_transactions", fields: [fromCustomerId], references: [id])
   toCustomer     Customer?       @relation("to_transactions", fields: [toCustomerId], references: [id])
 
@@ -129,9 +129,9 @@ enum NotificationType {
 }
 
 model Notification {
-  id        BigInt   @id @default(autoincrement())
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id        BigInt    @id @default(autoincrement())
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
   customerId String   @map("customer_id")

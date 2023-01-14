@@ -7,7 +7,7 @@ import { TokenService } from "../../../../lib/database/tokenService";
 import { postKarmaTransfer } from "../../../../lib/karma";
 
 const externalTransferSchema = z.object({
-  amount: z.preprocess(BigInt, z.bigint()).refine((amount) => amount > 0),
+  amount: z.preprocess((v) => Number(v), z.number()),
   to: z.string(),
   message: z.string().optional(),
   token: z.string(),
@@ -38,7 +38,7 @@ export default catchAsync(async function handle(req, res) {
       });
 
       const isTrans = await postKarmaTransfer({
-        soTien: amount as any,
+        soTien: amount,
         noiDungCK: message,
         nguoiNhan: to,
         nguoiChuyen: fromCustomer.accountNumber,
@@ -46,16 +46,20 @@ export default catchAsync(async function handle(req, res) {
         tenNH: "HCMUSBank",
       });
 
-      if (!isTrans) {
-        await CustomerService.transferInternally({
-          from: fromCustomer.accountNumber,
-          to: to,
+      if (isTrans) {
+        await CustomerService.transferExternally({
+          fromAccountNumber: fromCustomer.accountNumber,
+          toAccountNumber: to,
           amount,
           message,
           payer,
         });
+        const { chuKy, ...ret } = isTrans.data;
+        console.log(ret);
+        res.status(200).json({ data: ret });
+        break;
       }
-      res.status(200).json({ data: isTrans });
+      res.status(400).json({ error: { message: "Transfer failed" } });
       break;
     }
     default:
