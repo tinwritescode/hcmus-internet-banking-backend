@@ -19,6 +19,12 @@ export class TransactionService {
         mnemonicName: true,
       },
     },
+    toRecipient: {
+      select: {
+        accountNumber: true,
+        mnemonicName: true,
+      },
+    },
     message: true,
     id: true,
     type: true,
