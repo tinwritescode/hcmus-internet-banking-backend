@@ -32,6 +32,7 @@ export default catchAsync(async function dangerouslyHandle(req, res) {
       validateSchema(postDepositSchema, req.body);
       // get encoded data
       const { data, signature } = postDepositSchema.parse(req.body);
+
       const isValid = await verify({
         data,
         signature,

@@ -78,19 +78,8 @@ export class RecipientService {
             },
           },
         },
-        select: {
-          ...RecipientService.defaultSelector,
-          customerRecipient: {
-            select: {
-              customer: {
-                select: {
-                  firstName: true,
-                  lastName: true,
-                },
-              },
-            },
-          },
-        },
+        select: RecipientService.defaultSelector,
+
         skip: offset,
         take: limit,
       });
